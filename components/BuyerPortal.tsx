@@ -75,7 +75,7 @@ export function BuyerPortal({ token }: { token: string }) {
   useEffect(() => {
     if (window.location.hash !== "#auth-required") return;
     window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
-    const showTimer = window.setTimeout(() => setToast("请先验证手机号和订单号，再下载专属文件"), 0);
+    const showTimer = window.setTimeout(() => setToast("验证手机号和订单号，下载专属你的突击资料"), 0);
     const hideTimer = window.setTimeout(() => setToast(""), 5_000);
     return () => {
       window.clearTimeout(showTimer);
@@ -169,7 +169,7 @@ export function BuyerPortal({ token }: { token: string }) {
         <section className="expired-card">
           <div className="icon-orb"><Clock3 /></div>
           <span className="eyebrow">小圆 PTE 突击</span>
-          <h1>这份宝藏资料已到期</h1>
+          <h1>这份宝藏资料已领取</h1>
           <p>{error || "链接已失效，有问题请直接联系小圆。"}</p>
         </section>
       </main>
@@ -196,14 +196,14 @@ export function BuyerPortal({ token }: { token: string }) {
         <div className="portal-hero">
           <span className="eyebrow"><Sparkles size={15} /> PURCHASE UNLOCKED</span>
           <h1>恭喜宝宝<br />解锁 <em>{status.entryMeta.label}</em> 宝藏资料</h1>
-          <p className="hero-copy">{status.entryMeta.description}。完成验证后，带有你专属水印的资料就可以带走啦。</p>
+          <p className="hero-copy">{status.entryMeta.description}。验证成功后，就可以带走你的专属资料啦。</p>
           <div className="treasure-ticket">
             <div className="ticket-icon"><Gift /></div>
             <div><span>本期资料</span><strong>{status.versionName}</strong></div>
             <div className="ticket-time"><Clock3 size={17} /><span>{phaseNote}</span></div>
           </div>
           <div className="promise-row">
-            <span><CheckCircle2 /> 每页专属水印</span>
+            <span><CheckCircle2 /> </span>
             <span><CheckCircle2 /> 原文件重复下载</span>
             <span><CheckCircle2 /> 登录状态自动保存</span>
           </div>
@@ -215,7 +215,7 @@ export function BuyerPortal({ token }: { token: string }) {
               <div className="success-mark"><PackageCheck /></div>
               <span className="step-kicker">专属文件准备好啦</span>
               <h2>宝藏已装进你的口袋</h2>
-              <p>{status.phone ? `已验证手机 ${status.phone}` : "身份验证已完成"}，有效期内可以随时回来下载这份原文件。</p>
+              <p>{status.phone ? `已验证手机 ${status.phone}` : "身份验证已完成"}，记得保存好你的文件哦！</p>
               <div className="file-tile">
                 <FileArchive />
                 <div><strong>{status.filename}</strong><span>生成于 {status.generatedAt ? new Date(status.generatedAt).toLocaleString("zh-CN") : "刚刚"}</span></div>
@@ -224,29 +224,29 @@ export function BuyerPortal({ token }: { token: string }) {
               <a className="primary-button download-button" href={`/api/public/${token}/download`}>
                 <Download /> 下载我的专属文件
               </a>
-              <p className="fine-print"><LockKeyhole /> 文件只在当前资料链接有效期内开放下载，请及时保存。</p>
+              <p className="fine-print"><LockKeyhole /> 请及时保存文件哦</p>
             </div>
           ) : isGenerating ? (
             <div className="generating-state">
               <div className="generation-orb"><Sparkles /><span>{progress}%</span></div>
               <span className="step-kicker">正在准备你的宝藏</span>
-              <h2>{progress < 35 ? "正在验证信息" : progress < 76 ? "正在添加专属水印" : "正在整理文件"}</h2>
-              <p>每一页都在认真盖上你的专属标记，请稍等一下。</p>
+              <h2>{progress < 35 ? "正在验证信息" : progress < 88 ? "正在整理文件" : "马上就好啦"}</h2>
+              <p>小圆正带着你的专属资料飞奔而来～</p>
               <div className="progress-track"><span style={{ width: `${progress}%` }} /></div>
-              <div className="progress-steps"><span className="active">验证</span><span className={progress > 35 ? "active" : ""}>水印</span><span className={progress > 76 ? "active" : ""}>整理</span></div>
+              <div className="progress-steps"><span className="active">验证</span><span className={progress > 35 ? "active" : ""}>整理</span><span className={progress > 88 ? "active" : ""}>上传</span></div>
             </div>
           ) : (
             <form onSubmit={submit}>
               <span className="step-kicker">领取只差一步</span>
               <h2>{status.phase === "DOWNLOAD_ONLY" ? "登录并下载之前的文件" : "生成我的专属文件"}</h2>
-              <p className="form-intro">验证购买信息后，系统会为你安全地准备资料。</p>
+              <p className="form-intro">验证购买信息后，系统将为你生成专属宝藏资料。</p>
 
               <label className="field-label" htmlFor="phone">中国大陆手机号</label>
               <div className="input-shell">
                 <Phone size={19} /><span className="country-code">+86</span>
                 <input id="phone" inputMode="numeric" autoComplete="tel" maxLength={11} value={phone} onChange={(event) => setPhone(event.target.value.replace(/\D/g, ""))} placeholder="请输入11位手机号" />
               </div>
-              <p className="field-help">没有中国大陆手机号，请联系小圆。</p>
+              <p className="field-help">没有中国大陆手机号，请直接联系小圆处理。</p>
 
               <label className="field-label" htmlFor="code">短信验证码</label>
               <div className="input-shell code-shell">
@@ -254,6 +254,7 @@ export function BuyerPortal({ token }: { token: string }) {
                 <input id="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))} placeholder="6位验证码" />
                 <button type="button" onClick={sendCode} disabled={sending || cooldown > 0}>{sending ? "发送中" : cooldown > 0 ? `${cooldown}s` : "获取验证码"}</button>
               </div>
+              <p className="field-help">验证码来源【成都原石闪闪科技】</p>
 
               <label className="field-label" htmlFor="order">小红书订单号</label>
               <div className="input-shell">
@@ -268,12 +269,12 @@ export function BuyerPortal({ token }: { token: string }) {
               <button className="primary-button" type="submit">
                 {status.phase === "DOWNLOAD_ONLY" ? "登录并查看文件" : "生成我的专属文件"}<ArrowRight />
               </button>
-              <p className="privacy-note"><LockKeyhole /> 为生成和保护专属资料，系统将保存手机号和订单号，并在资料每一页添加完整手机号水印。继续即表示你已了解上述用途。</p>
+              <p className="privacy-note"><LockKeyhole /> 为生成和保护专属资料，系统将保存手机号和订单号，并为你生成专属资料哦！加油好好复习，祝考试顺利哦！</p>
             </form>
           )}
         </section>
       </section>
-      <footer>小圆 PTE 突击 · 认真准备的资料，也认真保护每一份信任</footer>
+      <footer>小圆 PTE 突击 · 认真准备资料，也认真保护每一份信任</footer>
     </main>
   );
 }

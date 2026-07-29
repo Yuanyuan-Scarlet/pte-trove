@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   const metadataBase = new URL(`${protocol}://${host}`);
   const title = "小圆 PTE 突击宝藏资料";
-  const description = "验证订单，生成带专属水印的 PTE 宝藏资料并安全下载。";
+  const description = "验证订单，生成专属PTE宝藏资料哦。";
   const image = new URL("/og.png", metadataBase).toString();
   return {
     metadataBase,
