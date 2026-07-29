@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Xiaoyuan PTE Trove archival every day
+
+[Timer]
+OnCalendar=*-*-* 02:00:00 Asia/Shanghai
+Persistent=true
+RandomizedDelaySec=300
+Unit=prep-trove-archive.service
+
+[Install]
+WantedBy=timers.target

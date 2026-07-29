@@ -1,9 +1,9 @@
 import { getLinkPhase, type LinkPhase } from "./domain";
-import { ensureSchema, first, run } from "./db";
+import { batch, first, run } from "./db";
 import { HttpError, parseCookies, cookie } from "./http";
 import { randomId, randomToken, seal, sha256, unseal } from "./crypto";
 import type { ProductEntry } from "./constants";
-import { getEnv } from "./runtime";
+import { storageObjectMatches } from "./storage";
 
 export interface LinkRecord {
   linkId: string;
@@ -79,11 +79,13 @@ export interface BuyerSessionState {
   bindingId: string;
   phone: string;
   orderNumber: string;
+  jobId: string | null;
   jobStatus: string | null;
   fileId: string | null;
   storageKey: string | null;
   downloadFilename: string | null;
   mimeType: string | null;
+  fileSize: number | null;
   generatedAt: number | null;
 }
 
@@ -91,10 +93,11 @@ export async function getBuyerSessionState(request: Request, link: LinkRecord): 
   if (phaseOf(link) === "EXPIRED") return null;
   const token = parseCookies(request).get(buyerCookieName(link.linkId));
   if (!token) return null;
-  return first<BuyerSessionState>(
+  const state = await first<BuyerSessionState>(
     `SELECT bb.id AS bindingId, bb.phone, bb.order_number AS orderNumber,
-      gj.status AS jobStatus, gf.id AS fileId, gf.storage_key AS storageKey,
-      gf.download_filename AS downloadFilename, gf.mime_type AS mimeType, gf.generated_at AS generatedAt
+      gj.id AS jobId, gj.status AS jobStatus, gf.id AS fileId, gf.storage_key AS storageKey,
+      gf.download_filename AS downloadFilename, gf.mime_type AS mimeType, gf.file_size AS fileSize,
+      gf.generated_at AS generatedAt
     FROM buyer_sessions bs
     JOIN buyer_bindings bb ON bb.id = bs.buyer_binding_id
     LEFT JOIN generation_jobs gj ON gj.buyer_binding_id = bb.id
@@ -103,6 +106,37 @@ export async function getBuyerSessionState(request: Request, link: LinkRecord): 
       AND bb.material_version_id = ? AND bb.product_entry = ?`,
     await sha256(token), Date.now(), link.materialVersionId, link.productEntry,
   );
+  if (!state || state.jobStatus !== "SUCCEEDED") return state;
+
+  const available = Boolean(state.fileId && state.storageKey && state.fileSize !== null)
+    && await storageObjectMatches(state.storageKey!, state.fileSize!);
+  if (available) return state;
+
+  const now = Date.now();
+  const updates: Array<{ sql: string; values: Array<string | number> }> = [];
+  if (state.fileId) {
+    updates.push({
+      sql: "UPDATE generated_files SET status = 'MISSING', archived_at = ? WHERE id = ? AND status = 'ACTIVE'",
+      values: [now, state.fileId],
+    });
+  }
+  if (state.jobId) {
+    updates.push({
+      sql: "UPDATE generation_jobs SET status = 'FAILED', error_code = 'FILE_MISSING', completed_at = ? WHERE id = ?",
+      values: [now, state.jobId],
+    });
+  }
+  if (updates.length) await batch(updates);
+  return {
+    ...state,
+    jobStatus: "FAILED",
+    fileId: null,
+    storageKey: null,
+    downloadFilename: null,
+    mimeType: null,
+    fileSize: null,
+    generatedAt: null,
+  };
 }
 
 export async function getBuyerAccess(request: Request, link: LinkRecord): Promise<BuyerAccess | null> {
@@ -126,26 +160,25 @@ export async function publishProductLinks(
   generationDeadline: number,
   expiresAt: number,
 ): Promise<Array<{ entry: ProductEntry; token: string }>> {
-  await ensureSchema();
   const entries = ["WFD", "DI", "SST", "RS", "WE", "BUNDLE"] as ProductEntry[];
   const createdAt = Date.now();
   const output: Array<{ entry: ProductEntry; token: string }> = [];
-  const inserts: D1PreparedStatement[] = [];
+  const inserts: Array<{ sql: string; values: Array<string | number> }> = [];
   for (const entry of entries) {
     const token = randomToken(32);
-    inserts.push(getEnv().DB.prepare(
-      `INSERT INTO product_links (id, material_version_id, product_entry, token_ciphertext, token_hash, created_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-    ).bind(
-      randomId(), materialVersionId, entry, await seal(token), await sha256(token), createdAt,
-    ));
+    inserts.push({
+      sql: `INSERT INTO product_links (id, material_version_id, product_entry, token_ciphertext, token_hash, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+      values: [randomId(), materialVersionId, entry, await seal(token), await sha256(token), createdAt],
+    });
     output.push({ entry, token });
   }
-  inserts.push(getEnv().DB.prepare(
-    `UPDATE material_versions SET status = 'PUBLISHED', published_at = ?, generation_deadline = ?, expires_at = ?
-     WHERE id = ? AND status = 'DRAFT'`,
-  ).bind(publishedAt, generationDeadline, expiresAt, materialVersionId));
-  await getEnv().DB.batch(inserts);
+  inserts.push({
+    sql: `UPDATE material_versions SET status = 'PUBLISHED', published_at = ?, generation_deadline = ?, expires_at = ?
+      WHERE id = ? AND status = 'DRAFT'`,
+    values: [publishedAt, generationDeadline, expiresAt, materialVersionId],
+  });
+  await batch(inserts);
   return output;
 }
 

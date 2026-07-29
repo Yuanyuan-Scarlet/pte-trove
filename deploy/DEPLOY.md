@@ -1,0 +1,142 @@
+# 阿里云轻量服务器部署手册
+
+> 本文档由 AI 辅助整理，并由项目负责人审核。
+
+## 目标架构
+
+| 项目 | 配置 |
+| --- | --- |
+| 轻量服务器 | `c3c514211070460cb094dde74fbeadb9`，`cn-shanghai`，Debian 12 |
+| 域名 | `bzzl.ysspark.cn` |
+| nginx | 公网 80/443，反向代理至 `127.0.0.1:3100` |
+| 应用 | Node.js 24+、Next.js、systemd |
+| 数据库 | `/var/lib/prep-trove/db/prep-trove.sqlite3`，SQLite WAL |
+| 私有文件 | `/var/lib/prep-trove/files` |
+| 发布目录 | `/opt/prep-trove/releases/<timestamp>`，`current` 为当前版本软链接 |
+| 环境变量 | `/etc/prep-trove.env`，权限 `0600` |
+
+现有 `ysspark.cn`、`knowmefun.cn` 和 8000 端口上的 `di_backend` 不得修改。本应用固定使用 3100 端口。
+
+## 首次部署前
+
+1. 将 `bzzl.ysspark.cn` 的 A 记录指向轻量服务器公网 IP。
+2. 在本机确认 `aliyun sts GetCallerIdentity` 和 SWAS 插件可用。
+3. 准备至少 32 个随机字符的 `APP_SECRET` 和阿里云短信生产配置。
+
+如果 `/etc/prep-trove.env` 尚不存在，首次安装会在服务器内部复用现有 DI 服务的阿里云短信变量并生成独立 `APP_SECRET`。安装脚本会生成高熵管理入口、非默认账号和 48 位十六进制强随机密码，密码只以 PBKDF2 摘要写入环境文件。首次凭据写入 `/root/prep-trove-admin-credentials.txt`（权限 `0600`）；安全保存后应删除该明文文件。
+
+服务器环境文件格式如下，禁止提交真实值：
+
+```dotenv
+ADMIN_ROUTE=manage-replace-with-48-lowercase-hex-characters
+ADMIN_USERNAME=operator_replace-with-16-lowercase-hex-characters
+ADMIN_PASSWORD_HASH=replace-with-generated-hash
+APP_SECRET=replace-with-random-secret
+APP_DATA_DIR=/var/lib/prep-trove
+ENVIRONMENT=production
+SMS_MODE=aliyun
+ALIBABA_CLOUD_SMS_ACCESS_KEY_ID=replace-me
+ALIBABA_CLOUD_SMS_ACCESS_KEY_SECRET=replace-me
+SMS_SIGN_NAME=replace-me
+SMS_TEMPLATE_CODE=replace-me
+SMS_TEMPLATE_VARIABLE=code
+SMS_REGION_ID=cn-hangzhou
+```
+
+使用云助手将该文件写入 `/etc/prep-trove.env`，随后执行：
+
+```bash
+chown root:prep-trove /etc/prep-trove.env
+chmod 0640 /etc/prep-trove.env
+```
+
+## 发布应用
+
+在 Git Bash 中从仓库根目录执行：
+
+```bash
+bash deploy/deploy.sh
+```
+
+脚本会排除 Git 元数据、依赖、缓存、开发密钥和业务数据，经阿里云云助手分块上传源码。体积较大的公开 OG 图片和中文 WOFF2 字体由服务器从 GitHub 当前 `main` 下载并校验固定 SHA-256；服务器使用 `woff2_decompress` 生成水印所需的 PDF 兼容 TTF，避免把约 2.5 MB 的派生字体放入上传包。随后服务器运行 `npm ci`、`npm run build`，构建步骤会将完整公开资源和前端静态资源装入 standalone 目录。systemd 直接运行 standalone server，通过健康检查后原子切换 `current`；健康检查失败时自动恢复上一个版本。
+
+服务器安装步骤会统一把 `deploy/*.sh` 恢复为 `0755`，用于兼容 Windows 打包时丢失 Unix 可执行位的情况。部署完成后必须确认备份服务实际运行成功，不能只依赖应用健康检查。
+
+服务器 SSH 密钥可用时，优先将排除密钥、缓存、依赖和业务数据的发布包 SCP 到 `/tmp/prep-trove-app.tgz`，再以 root 执行 `deploy/remote-release.sh`。该方式一次传输完整包，服务器侧仍执行相同的构建、健康检查和原子回滚流程。云助手分块脚本作为无 SSH 时的回退通道。
+
+## nginx 与证书
+
+首次签证书前先安装 `deploy/nginx/bzzl.ysspark.cn.http.conf`，执行 `nginx -t` 后 reload。随后运行：
+
+```bash
+certbot certonly --webroot -w /var/www/bzzl.ysspark.cn -d bzzl.ysspark.cn --non-interactive --agree-tos -m service@ysspark.cn
+```
+
+证书签发成功后将 `deploy/nginx/bzzl.ysspark.cn.conf` 安装到 `/etc/nginx/conf.d/bzzl.ysspark.cn.conf`，再次执行 `nginx -t` 和 reload。
+
+## 日常运维
+
+```bash
+systemctl status prep-trove.service
+journalctl -u prep-trove.service --since '1 hour ago'
+systemctl list-timers 'prep-trove-*'
+curl --fail http://127.0.0.1:3100/api/health
+```
+
+归档任务每天按 `Asia/Shanghai` 02:00 执行，数据库在线备份每天 03:00 执行并保留 14 天。服务器本地备份仍与业务数据位于同一块磁盘，必须同时启用阿里云轻量服务器自动快照或将备份同步到另一存储位置。
+
+## 访问生产管理后台
+
+生产管理入口、账号和密码均由首次安装随机生成。固定 `/admin` 按设计返回 404，不用于生产登录。
+
+在项目根目录使用 PowerShell 执行：
+
+```powershell
+ssh -i ".\.secrets\aliyun\ptedi.pem" root@47.116.99.82 "cat /root/prep-trove-admin-credentials.txt"
+```
+
+root-only 凭据文件返回以下三项：
+
+```text
+ADMIN_URL=...
+ADMIN_USERNAME=...
+ADMIN_PASSWORD=...
+```
+
+在浏览器打开 `ADMIN_URL`，使用对应账号和密码登录。实际管理路径、账号和密码不得写入代码仓、聊天、邮件、截图或普通文档。将凭据保存到可信密码管理器并确认可恢复后，应删除服务器上的明文凭据文件；生产环境只在 `/etc/prep-trove.env` 保留管理路径、账号和密码摘要。
+
+项目内 PEM 副本位于 `.secrets/aliyun/ptedi.pem`，整个 `.secrets/` 目录必须保持 Git 忽略状态。
+
+### 固定凭据防误变更
+
+生产管理路径、用户名和密码在首次初始化后保持固定。应用运行时以 `/etc/prep-trove.env` 为唯一配置来源；`/root/prep-trove-admin-credentials.txt` 只用于首次交付明文凭据，不会反向更新应用配置。
+
+`/etc/prep-trove.env` 是 systemd `EnvironmentFile`，其中的密码摘要可能包含 `$`。不得使用 `. /etc/prep-trove.env` 或 `source /etc/prep-trove.env` 将整份文件当作 Shell 脚本执行；Shell 会展开摘要中的 `$`，可能导致报错或传入错误值。一次性维护命令应通过 systemd 启动应用，或只显式传入该命令实际需要的非敏感变量。
+
+日常发布必须遵守以下规则：
+
+1. 不得删除、覆盖或用仓库中的 `.env.example` 替换 `/etc/prep-trove.env`。
+2. 不得删除或单独修改 `ADMIN_ROUTE`、`ADMIN_USERNAME`、`ADMIN_PASSWORD_HASH`。三项需要人工轮换时必须作为同一次受控变更处理，并同步更新密码管理器。
+3. `ADMIN_ROUTE` 必须保持 `manage-` 加 48 位小写十六进制字符；`ADMIN_USERNAME` 不得改回 `admin`。安装脚本发现管理路径缺失/格式无效，或用户名为 `admin` 时，会将三项重新初始化。
+4. 正常发布前后都要核对管理配置指纹。指纹一致表示三项没有发生变化；命令只输出摘要，不显示实际凭据：
+
+   ```bash
+   grep -E '^(ADMIN_ROUTE|ADMIN_USERNAME|ADMIN_PASSWORD_HASH)=' /etc/prep-trove.env | sort | sha256sum
+   ```
+
+5. 首次确认凭据可登录后，将实际 URL、用户名和密码保存到可信密码管理器。删除 `/root/prep-trove-admin-credentials.txt` 不会改变运行中的凭据；删除前必须确认密码管理器中的记录可以恢复。
+6. 修改 `/etc/prep-trove.env` 前先创建 root-only 备份，并确认备份权限：
+
+   ```bash
+   backup="/root/prep-trove.env.$(date -u +%Y%m%dT%H%M%SZ).backup"
+   install -o root -g root -m 0600 /etc/prep-trove.env "$backup"
+   stat -c '%a %U:%G %n' "$backup"
+   ```
+
+7. 部署后验证固定 `/admin` 仍返回 404、密码管理器中的 `ADMIN_URL` 返回管理登录页，并完成一次登录与退出。不得在命令日志、工单、聊天或截图中打印实际凭据。
+
+如果部署前后管理配置指纹不同，应停止继续操作，保持管理入口不对外传播，检查 `/etc/prep-trove.env` 的变更时间、发布日志和安装脚本输出；确认原因并恢复受控备份后再重启应用。
+
+## 回滚
+
+列出 `/opt/prep-trove/releases`，将 `/opt/prep-trove/current` 指向上一个完整版本，再重启服务。数据目录独立于代码版本，回滚代码不会覆盖 SQLite 和资料文件。涉及数据库结构变更时必须先阅读对应迁移说明。

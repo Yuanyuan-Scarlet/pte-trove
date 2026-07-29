@@ -1,12 +1,13 @@
 import type { LinkRecord } from "./links";
 import { createBuyerSession, phaseOf } from "./links";
 import { isValidOrderNumber, isValidPhone, normalizeOrderNumber, normalizePhone } from "./domain";
-import { first, run } from "./db";
-import { HttpError } from "./http";
+import { batch, first, run } from "./db";
+import { HttpError, requestIsSecure } from "./http";
 import { randomId } from "./crypto";
 import { generateBuyerFile } from "./files";
 import { issueOtp, verifyAndConsumeOtp } from "./sms";
 import { getEnv } from "./runtime";
+import { storageObjectMatches } from "./storage";
 
 interface BindingRow {
   id: string;
@@ -21,6 +22,7 @@ interface ExistingFileRow {
   storage_key: string | null;
   download_filename: string | null;
   mime_type: string | null;
+  file_size: number | null;
   generated_at: number | null;
   started_at: number | null;
 }
@@ -50,11 +52,41 @@ export async function sendBuyerCode(link: LinkRecord, rawPhone: unknown, ip: str
 async function findExistingFile(bindingId: string): Promise<ExistingFileRow | null> {
   return first<ExistingFileRow>(
     `SELECT gj.id AS job_id, gj.status AS job_status, gj.started_at, gf.id AS file_id, gf.storage_key,
-      gf.download_filename, gf.mime_type, gf.generated_at
+      gf.download_filename, gf.mime_type, gf.file_size, gf.generated_at
      FROM generation_jobs gj LEFT JOIN generated_files gf ON gf.generation_job_id = gj.id AND gf.status = 'ACTIVE'
      WHERE gj.buyer_binding_id = ?`,
     bindingId,
   );
+}
+
+async function reconcileExistingFile(existing: ExistingFileRow): Promise<ExistingFileRow> {
+  const complete = Boolean(existing.file_id && existing.storage_key && existing.file_size !== null);
+  if (complete && await storageObjectMatches(existing.storage_key!, existing.file_size!)) return existing;
+  if (existing.job_status !== "SUCCEEDED" && !existing.file_id) return existing;
+
+  const now = Date.now();
+  const updates: Array<{ sql: string; values: Array<string | number> }> = [];
+  if (existing.file_id) {
+    updates.push({
+      sql: "UPDATE generated_files SET status = 'MISSING', archived_at = ? WHERE id = ? AND status = 'ACTIVE'",
+      values: [now, existing.file_id],
+    });
+  }
+  updates.push({
+    sql: "UPDATE generation_jobs SET status = 'FAILED', error_code = 'FILE_MISSING', completed_at = ? WHERE id = ?",
+    values: [now, existing.job_id],
+  });
+  await batch(updates);
+  return {
+    ...existing,
+    job_status: "FAILED",
+    file_id: null,
+    storage_key: null,
+    download_filename: null,
+    mime_type: null,
+    file_size: null,
+    generated_at: null,
+  };
 }
 
 export interface AccessResult {
@@ -71,7 +103,7 @@ export async function accessBuyerFile(
   rawCode: unknown,
   rawOrderNumber: unknown,
 ): Promise<AccessResult> {
-  const secureCookie = new URL(request.url).protocol === "https:";
+  const secureCookie = requestIsSecure(request);
   const phone = normalizePhone(rawPhone);
   const code = String(rawCode ?? "").trim();
   const orderNumber = normalizeOrderNumber(rawOrderNumber);
@@ -129,6 +161,7 @@ export async function accessBuyerFile(
   }
 
   let existing = await findExistingFile(bindingId);
+  if (existing) existing = await reconcileExistingFile(existing);
   if (existing?.file_id && existing.download_filename && existing.generated_at) {
     if (existing.job_status !== "SUCCEEDED") {
       await run("UPDATE generation_jobs SET status = 'SUCCEEDED', completed_at = ?, error_code = NULL WHERE id = ?", Date.now(), existing.job_id);
@@ -173,9 +206,11 @@ export async function accessBuyerFile(
   }
 
   try {
-    const file = await generateBuyerFile(
-      link.materialVersionId, link.productEntry, bindingId, existing.job_id, phone, request.url,
-    );
+    const file = await generateBuyerFile(link.materialVersionId, link.productEntry, bindingId, existing.job_id, phone);
+    if (!await storageObjectMatches(file.storageKey, file.fileSize)) {
+      await run("UPDATE generated_files SET status = 'MISSING', archived_at = ? WHERE id = ?", Date.now(), file.id);
+      throw new HttpError(500, "专属文件写入失败，请稍后重试", "GENERATED_FILE_MISSING");
+    }
     await run("UPDATE generation_jobs SET status = 'SUCCEEDED', completed_at = ?, error_code = NULL WHERE id = ?", Date.now(), existing.job_id);
     const session = await createBuyerSession(bindingId, link, secureCookie);
     return { state: "READY", cookie: session.header, filename: file.downloadFilename, generatedAt: file.generatedAt };

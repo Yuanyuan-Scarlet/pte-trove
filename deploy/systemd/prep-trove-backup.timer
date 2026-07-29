@@ -1,0 +1,11 @@
+[Unit]
+Description=Back up Xiaoyuan PTE Trove every day
+
+[Timer]
+OnCalendar=*-*-* 03:00:00 Asia/Shanghai
+Persistent=true
+RandomizedDelaySec=300
+Unit=prep-trove-backup.service
+
+[Install]
+WantedBy=timers.target

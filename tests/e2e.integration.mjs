@@ -5,6 +5,9 @@ import { unzipSync } from "fflate";
 
 const baseUrl = process.env.E2E_BASE_URL ?? "http://localhost:3000";
 const originHeaders = { origin: baseUrl };
+const adminRoute = process.env.ADMIN_ROUTE ?? "admin";
+const adminUsername = process.env.ADMIN_USERNAME ?? "admin";
+const adminPassword = process.env.ADMIN_PASSWORD ?? "admin12345";
 const runDigits = String(Date.now()).slice(-8);
 const phone = `139${runDigits}`;
 const orderNumber = `P${String(Date.now()).padStart(18, "0").slice(-18)}`;
@@ -18,7 +21,7 @@ async function jsonResponse(response) {
 const loginResponse = await fetch(`${baseUrl}/api/admin/login`, {
   method: "POST",
   headers: { ...originHeaders, "content-type": "application/json" },
-  body: JSON.stringify({ username: "admin", password: "admin12345" }),
+  body: JSON.stringify({ routeKey: adminRoute, username: adminUsername, password: adminPassword }),
 });
 await jsonResponse(loginResponse);
 const adminCookie = loginResponse.headers.get("set-cookie")?.split(";", 1)[0];

@@ -3,8 +3,9 @@
 import { Check, Clipboard, FileCheck2, FileUp, Link2, LoaderCircle, LogOut, Plus, Rocket, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { MATERIAL_TYPES, MATERIAL_UPLOAD_LIMIT_MIB } from "@/lib/constants";
 
-const TYPES = ["WFD", "DI", "SST", "RS", "WE"] as const;
+const TYPES = MATERIAL_TYPES;
 
 interface Asset { material_type: string; original_filename: string; file_size: number; page_count: number; }
 interface Version {
@@ -21,7 +22,7 @@ function statusLabel(status: string) {
   return ({ DRAFT: "草稿", GENERATION_OPEN: "开放生成", DOWNLOAD_ONLY: "仅限下载", EXPIRED: "已失效" } as Record<string, string>)[status] ?? status;
 }
 
-export function AdminDashboard() {
+export function AdminDashboard({ routeKey }: { routeKey: string }) {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -68,9 +69,9 @@ export function AdminDashboard() {
   async function login(event: FormEvent) {
     event.preventDefault(); setBusy("login"); setError("");
     try {
-      const response = await fetch("/api/admin/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ username, password }) });
-      const data = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(data.error ?? "登录失败");
+      const response = await fetch("/api/admin/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ routeKey, username, password }) });
+      const data = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) throw new Error(data.error ?? (response.status === 429 ? "登录尝试次数过多，请稍后再试" : "登录失败"));
       await loadVersions();
     } catch (reason) { setError(reason instanceof Error ? reason.message : "登录失败"); }
     finally { setBusy(""); }
@@ -159,7 +160,7 @@ export function AdminDashboard() {
                     <label className={`upload-card ${asset ? "complete" : ""}`} key={type}>
                       <input type="file" accept="application/pdf,.pdf" onChange={(event) => { const file = event.target.files?.[0]; if (file) upload(type, file); event.target.value = ""; }} />
                       <div className="upload-icon">{uploading ? <LoaderCircle className="spin" /> : asset ? <FileCheck2 /> : <FileUp />}</div>
-                      <div><span>{type}</span><strong>{asset ? asset.original_filename : `上传 ${type}.pdf`}</strong><small>{asset ? `${asset.page_count}页 · ${(asset.file_size / 1024 / 1024).toFixed(1)}MB` : "点击选择 PDF，最大 50MB"}</small></div>
+                      <div><span>{type}</span><strong>{asset ? asset.original_filename : `上传 ${type}.pdf`}</strong><small>{asset ? `${asset.page_count}页 · ${(asset.file_size / 1024 / 1024).toFixed(1)}MB` : `点击选择 PDF，最大 ${MATERIAL_UPLOAD_LIMIT_MIB[type]}MB`}</small></div>
                       {asset && <Check className="upload-check" />}
                     </label>
                   ); })}

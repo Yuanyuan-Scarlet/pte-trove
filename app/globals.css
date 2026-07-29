@@ -35,6 +35,8 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .portal-nav strong { font-size: 16px; letter-spacing: .01em; }
 .portal-nav span { font-size: 12px; color: var(--muted); }
 .secure-chip { margin-left: auto; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid color-mix(in srgb, var(--accent) 22%, white); border-radius: 999px; color: color-mix(in srgb, var(--accent) 76%, #18373b); background: color-mix(in srgb, var(--accent) 7%, white); font-size: 12px; font-weight: 700; }
+.portal-toast { position: fixed; z-index: 50; top: 18px; left: 50%; display: flex; align-items: center; gap: 9px; width: max-content; max-width: calc(100vw - 32px); padding: 13px 18px; border: 1px solid #f0d5a6; border-radius: 14px; color: #704713; background: #fff9eb; box-shadow: 0 16px 45px rgb(57 39 18 / 18%); font-size: 14px; font-weight: 750; transform: translateX(-50%); }
+.portal-toast svg { width: 18px; height: 18px; flex: 0 0 auto; }
 .portal-layout { position: relative; z-index: 1; width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 58px 0 64px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(390px, .74fr); gap: clamp(48px, 7vw, 104px); align-items: center; }
 .portal-hero { padding: 10px 0; }
 .eyebrow { display: inline-flex; align-items: center; gap: 7px; color: var(--accent, var(--brand)); font-size: 12px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }

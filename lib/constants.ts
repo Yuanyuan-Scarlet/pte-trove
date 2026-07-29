@@ -4,6 +4,26 @@ export const PRODUCT_ENTRIES = [...MATERIAL_TYPES, "BUNDLE"] as const;
 export type MaterialType = (typeof MATERIAL_TYPES)[number];
 export type ProductEntry = (typeof PRODUCT_ENTRIES)[number];
 
+export const MATERIAL_UPLOAD_LIMIT_MIB: Record<MaterialType, number> = {
+  WFD: 50,
+  DI: 100,
+  SST: 50,
+  RS: 50,
+  WE: 50,
+};
+
+export const MATERIAL_UPLOAD_LIMIT_BYTES: Record<MaterialType, number> = {
+  WFD: MATERIAL_UPLOAD_LIMIT_MIB.WFD * 1024 * 1024,
+  DI: MATERIAL_UPLOAD_LIMIT_MIB.DI * 1024 * 1024,
+  SST: MATERIAL_UPLOAD_LIMIT_MIB.SST * 1024 * 1024,
+  RS: MATERIAL_UPLOAD_LIMIT_MIB.RS * 1024 * 1024,
+  WE: MATERIAL_UPLOAD_LIMIT_MIB.WE * 1024 * 1024,
+};
+
+export function isMaterialUploadSizeAllowed(type: MaterialType, size: number): boolean {
+  return size >= 0 && size <= MATERIAL_UPLOAD_LIMIT_BYTES[type];
+}
+
 export const ENTRY_META: Record<ProductEntry, { label: string; color: string; description: string }> = {
   WFD: { label: "WFD", color: "#0066FF", description: "听写高频词句，一份专注冲刺的提分资料" },
   DI: { label: "DI", color: "#FF6D01", description: "图表描述框架与练习，开口更有底气" },

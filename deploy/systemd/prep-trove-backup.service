@@ -1,0 +1,16 @@
+[Unit]
+Description=Back up Xiaoyuan PTE Trove SQLite database
+
+[Service]
+Type=oneshot
+User=prep-trove
+Group=prep-trove
+WorkingDirectory=/opt/prep-trove/current
+EnvironmentFile=/etc/prep-trove.env
+ExecStart=/opt/prep-trove/current/deploy/backup.sh
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/prep-trove /var/backups/prep-trove
+UMask=0027

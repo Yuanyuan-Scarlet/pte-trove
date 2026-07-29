@@ -1,0 +1,27 @@
+/node_modules
+/.data/
+/.npm-cache/
+/.openai/
+/.next/
+/.vinext/
+/dist/
+/.wrangler/
+/coverage/
+/outputs/
+/work/
+/.tmp/
+/.secrets/
+/.env*
+!.env.example
+/.dev.vars*
+*.pem
+*.log
+*.tsbuildinfo
+.DS_Store
+
+# Private and generated business files
+/materials/
+/history/
+/old-sold/
+*.pdf
+*.zip

@@ -1,11 +1,11 @@
 import { createVersion, listVersions } from "@/lib/admin";
 import { requireAdmin } from "@/lib/auth";
-import { assertSameOrigin, errorResponse, json, readJson } from "@/lib/http";
+import { assertSameOrigin, errorResponse, json, readJson, requestPublicOrigin } from "@/lib/http";
 
 export async function GET(request: Request) {
   try {
     await requireAdmin(request);
-    return json({ versions: await listVersions(new URL(request.url).origin) });
+    return json({ versions: await listVersions(requestPublicOrigin(request)) });
   } catch (error) {
     return errorResponse(error);
   }

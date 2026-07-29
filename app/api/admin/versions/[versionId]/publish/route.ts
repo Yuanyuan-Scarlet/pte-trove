@@ -1,6 +1,6 @@
 import { publishVersion } from "@/lib/admin";
 import { requireAdmin } from "@/lib/auth";
-import { assertSameOrigin, errorResponse, json } from "@/lib/http";
+import { assertSameOrigin, errorResponse, json, requestPublicOrigin } from "@/lib/http";
 
 export async function POST(request: Request, context: { params: Promise<{ versionId: string }> }) {
   try {
@@ -8,7 +8,7 @@ export async function POST(request: Request, context: { params: Promise<{ versio
     await requireAdmin(request);
     const { versionId } = await context.params;
     const result = await publishVersion(versionId);
-    const origin = new URL(request.url).origin;
+    const origin = requestPublicOrigin(request);
     return json({ ...result, links: result.links.map((link) => ({ entry: link.entry, url: `${origin}/g/${link.token}` })) });
   } catch (error) {
     return errorResponse(error);

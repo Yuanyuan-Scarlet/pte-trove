@@ -6,6 +6,28 @@ import { getEnv } from "./runtime";
 
 export const ADMIN_COOKIE = "pte_admin_session";
 
+export function adminRoute(): string {
+  const env = getEnv();
+  const configured = env.ADMIN_ROUTE?.trim();
+  if (!configured && env.ENVIRONMENT !== "production") return "admin";
+  if (!configured || !/^manage-[a-f0-9]{48}$/.test(configured)) {
+    throw new Error("生产环境必须配置高强度 ADMIN_ROUTE");
+  }
+  return configured;
+}
+
+export function isAdminRoute(value: string): boolean {
+  try {
+    return constantTimeEqual(value, adminRoute());
+  } catch {
+    return false;
+  }
+}
+
+export function assertAdminRoute(value: string): void {
+  if (!isAdminRoute(value)) throw new HttpError(404, "页面不存在", "NOT_FOUND");
+}
+
 function decodeBase64(value: string): Uint8Array {
   const binary = atob(value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "="));
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));

@@ -1,11 +1,11 @@
-import { MATERIAL_TYPES, type MaterialType } from "./constants";
+import { isMaterialUploadSizeAllowed, MATERIAL_TYPES, MATERIAL_UPLOAD_LIMIT_MIB, type MaterialType } from "./constants";
 import { calculateDeadlines, getLinkPhase } from "./domain";
 import { all, first, run } from "./db";
 import { randomId, sha256Bytes } from "./crypto";
 import { HttpError } from "./http";
 import { inspectPdf } from "./pdf";
 import { listProductLinks, publishProductLinks } from "./links";
-import { getEnv } from "./runtime";
+import { writeStorageObject } from "./storage";
 
 interface VersionRow {
   id: string;
@@ -37,12 +37,14 @@ export async function uploadAsset(versionId: string, type: MaterialType, file: F
   if (version.status !== "DRAFT") throw new HttpError(409, "已发布资料不能替换", "VERSION_ALREADY_PUBLISHED");
   if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) throw new HttpError(400, "只支持 PDF 文件", "INVALID_FILE_TYPE");
   const bytes = await file.arrayBuffer();
-  if (bytes.byteLength > 50 * 1024 * 1024) throw new HttpError(413, "单个 PDF 不能超过 50MB", "FILE_TOO_LARGE");
+  if (!isMaterialUploadSizeAllowed(type, bytes.byteLength)) {
+    throw new HttpError(413, `${type} PDF 不能超过 ${MATERIAL_UPLOAD_LIMIT_MIB[type]}MB`, "FILE_TOO_LARGE");
+  }
   const header = new TextDecoder().decode(bytes.slice(0, 5));
   if (header !== "%PDF-") throw new HttpError(400, "文件内容不是有效 PDF", "INVALID_PDF");
   const { pageCount } = await inspectPdf(bytes);
   const storageKey = `materials/${versionId}/source/${type}.pdf`;
-  await getEnv().FILES.put(storageKey, bytes, { httpMetadata: { contentType: "application/pdf" } });
+  await writeStorageObject(storageKey, bytes);
   const now = Date.now();
   const checksum = await sha256Bytes(bytes);
   const existing = await first<{ id: string }>(

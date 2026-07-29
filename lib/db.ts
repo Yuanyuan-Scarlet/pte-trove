@@ -1,4 +1,7 @@
-import { getEnv } from "./runtime";
+import fs from "node:fs";
+import path from "node:path";
+import Database from "better-sqlite3";
+import { databasePath } from "./runtime";
 
 const statements = [
   `CREATE TABLE IF NOT EXISTS material_versions (
@@ -56,32 +59,71 @@ const statements = [
   `CREATE INDEX IF NOT EXISTS admin_login_ip_created_idx ON admin_login_attempts(ip, created_at)`,
 ];
 
-let schemaReady: Promise<void> | null = null;
+type BindValue = string | number | bigint | null | Uint8Array;
 
-export async function ensureSchema(): Promise<void> {
-  if (!schemaReady) {
-    schemaReady = getEnv().DB.batch(statements.map((statement) => getEnv().DB.prepare(statement))).then(() => undefined).catch((error: unknown) => {
-      schemaReady = null;
-      throw error;
-    });
-  }
-  await schemaReady;
+export interface RunResult {
+  meta: {
+    changes: number;
+    lastRowId: number | bigint;
+  };
 }
 
-type BindValue = string | number | null | ArrayBuffer;
+let connection: Database.Database | null = null;
+let schemaReady = false;
+
+function getDatabase(): Database.Database {
+  if (connection) return connection;
+  const filePath = databasePath();
+  fs.mkdirSync(path.dirname(filePath), { recursive: true, mode: 0o750 });
+  connection = new Database(filePath);
+  connection.pragma("journal_mode = WAL");
+  connection.pragma("synchronous = NORMAL");
+  connection.pragma("foreign_keys = ON");
+  connection.pragma("busy_timeout = 5000");
+  return connection;
+}
+
+export async function ensureSchema(): Promise<void> {
+  if (schemaReady) return;
+  const database = getDatabase();
+  database.transaction(() => {
+    for (const statement of statements) database.exec(statement);
+  })();
+  schemaReady = true;
+}
 
 export async function first<T>(sql: string, ...values: BindValue[]): Promise<T | null> {
   await ensureSchema();
-  return getEnv().DB.prepare(sql).bind(...values).first<T>();
+  return (getDatabase().prepare(sql).get(...values) as T | undefined) ?? null;
 }
 
 export async function all<T>(sql: string, ...values: BindValue[]): Promise<T[]> {
   await ensureSchema();
-  const result = await getEnv().DB.prepare(sql).bind(...values).all<T>();
-  return result.results;
+  return getDatabase().prepare(sql).all(...values) as T[];
 }
 
-export async function run(sql: string, ...values: BindValue[]): Promise<D1Result<unknown>> {
+export async function run(sql: string, ...values: BindValue[]): Promise<RunResult> {
   await ensureSchema();
-  return getEnv().DB.prepare(sql).bind(...values).run();
+  const result = getDatabase().prepare(sql).run(...values);
+  return { meta: { changes: result.changes, lastRowId: result.lastInsertRowid } };
+}
+
+export interface BatchStatement {
+  sql: string;
+  values?: BindValue[];
+}
+
+export async function batch(items: BatchStatement[]): Promise<RunResult[]> {
+  await ensureSchema();
+  const execute = getDatabase().transaction((entries: BatchStatement[]) => entries.map((item) => {
+    const result = getDatabase().prepare(item.sql).run(...(item.values ?? []));
+    return { meta: { changes: result.changes, lastRowId: result.lastInsertRowid } };
+  }));
+  return execute(items);
+}
+
+export function closeDatabase(): void {
+  connection?.close();
+  connection = null;
+  schemaReady = false;
 }

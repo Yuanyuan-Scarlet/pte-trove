@@ -51,6 +51,7 @@ export function BuyerPortal({ token }: { token: string }) {
   const [orderNumber, setOrderNumber] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [toast, setToast] = useState("");
   const [sending, setSending] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -70,6 +71,17 @@ export function BuyerPortal({ token }: { token: string }) {
     }, 0);
     return () => window.clearTimeout(timer);
   }, [loadStatus]);
+
+  useEffect(() => {
+    if (window.location.hash !== "#auth-required") return;
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    const showTimer = window.setTimeout(() => setToast("请先验证手机号和订单号，再下载专属文件"), 0);
+    const hideTimer = window.setTimeout(() => setToast(""), 5_000);
+    return () => {
+      window.clearTimeout(showTimer);
+      window.clearTimeout(hideTimer);
+    };
+  }, []);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -170,6 +182,7 @@ export function BuyerPortal({ token }: { token: string }) {
 
   return (
     <main className="portal-page" style={{ "--accent": accent } as React.CSSProperties}>
+      {toast && <div className="portal-toast" role="status" aria-live="polite"><ShieldCheck />{toast}</div>}
       <div className="confetti confetti-one" />
       <div className="confetti confetti-two" />
       <div className="confetti confetti-three" />

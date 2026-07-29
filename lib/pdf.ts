@@ -1,23 +1,44 @@
 import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument, degrees, rgb } from "pdf-lib";
 import { zipSync } from "fflate";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { DOWNLOAD_NAMES, MATERIAL_TYPES, type MaterialType, type ProductEntry } from "./constants";
 import { HttpError } from "./http";
 
 let fontBytesPromise: Promise<ArrayBuffer> | null = null;
+let logoBytesPromise: Promise<ArrayBuffer> | null = null;
 
-async function getWatermarkFont(requestUrl: string): Promise<ArrayBuffer> {
+const WATERMARK_PAGE_WIDTH = 612;
+const WATERMARK_PAGE_HEIGHT = 792;
+const WATERMARK_FONT_SIZE = 72;
+const WATERMARK_TEXT_OPACITY = 0.06;
+const WATERMARK_LOGO_OPACITY = 0.02;
+const WATERMARK_ROTATION = 45;
+const WATERMARK_TEXT_OFFSET = 100;
+
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+}
+
+async function getWatermarkFont(): Promise<ArrayBuffer> {
   if (!fontBytesPromise) {
-    const url = new URL("/fonts/noto-sans-sc-400.woff2", requestUrl);
-    fontBytesPromise = fetch(url).then(async (response: Response) => {
-      if (!response.ok) throw new Error("Watermark font asset unavailable");
-      return response.arrayBuffer();
-    }).catch((error: unknown) => {
+    fontBytesPromise = readFile(path.join(process.cwd(), "public", "fonts", "noto-sans-sc-400.ttf")).then(toArrayBuffer).catch((error: unknown) => {
       fontBytesPromise = null;
       throw error;
     });
   }
-  return await fontBytesPromise;
+  return fontBytesPromise;
+}
+
+async function getWatermarkLogo(): Promise<ArrayBuffer> {
+  if (!logoBytesPromise) {
+    logoBytesPromise = readFile(path.join(process.cwd(), "public", "watermark", "logo.jpg")).then(toArrayBuffer).catch((error: unknown) => {
+      logoBytesPromise = null;
+      throw error;
+    });
+  }
+  return logoBytesPromise;
 }
 
 export async function inspectPdf(bytes: ArrayBuffer): Promise<{ pageCount: number }> {
@@ -31,37 +52,65 @@ export async function inspectPdf(bytes: ArrayBuffer): Promise<{ pageCount: numbe
   }
 }
 
-export async function addPhoneWatermark(source: ArrayBuffer, phone: string, requestUrl: string): Promise<Uint8Array> {
-  return addPhoneWatermarkWithFont(source, phone, await getWatermarkFont(requestUrl));
+export async function addPhoneWatermark(source: ArrayBuffer, phone: string): Promise<Uint8Array> {
+  const [fontBytes, logoBytes] = await Promise.all([getWatermarkFont(), getWatermarkLogo()]);
+  return addPhoneWatermarkWithAssets(source, phone, fontBytes, logoBytes);
 }
 
-export async function addPhoneWatermarkWithFont(source: ArrayBuffer, phone: string, fontBytes: ArrayBuffer): Promise<Uint8Array> {
+async function createWatermarkPage(phone: string, fontBytes: ArrayBuffer, logoBytes: ArrayBuffer): Promise<Uint8Array> {
+  const watermarkDocument = await PDFDocument.create();
+  watermarkDocument.registerFontkit(fontkit);
+  const [font, logo] = await Promise.all([
+    watermarkDocument.embedFont(fontBytes, { subset: false }),
+    watermarkDocument.embedJpg(logoBytes),
+  ]);
+  const page = watermarkDocument.addPage([WATERMARK_PAGE_WIDTH, WATERMARK_PAGE_HEIGHT]);
+
+  page.drawImage(logo, {
+    x: WATERMARK_PAGE_WIDTH - logo.width / 6,
+    y: 0,
+    width: logo.width / 12,
+    height: logo.height / 12,
+  });
+
+  const radians = WATERMARK_ROTATION * Math.PI / 180;
+  const drawWatermarkText = (text: string, translateX: number, translateY: number) => {
+    page.drawText(text, {
+      x: translateX - WATERMARK_TEXT_OFFSET * Math.cos(radians),
+      y: translateY - WATERMARK_TEXT_OFFSET * Math.sin(radians),
+      size: WATERMARK_FONT_SIZE,
+      font,
+      color: rgb(0, 0, 0),
+      opacity: WATERMARK_TEXT_OPACITY,
+      rotate: degrees(WATERMARK_ROTATION),
+    });
+  };
+  drawWatermarkText("祝考试好运 UPUP", 150, 200);
+  drawWatermarkText(phone, 200, 90);
+
+  page.drawImage(logo, {
+    x: (WATERMARK_PAGE_WIDTH - logo.width) / 2,
+    y: (WATERMARK_PAGE_HEIGHT - logo.height) / 2,
+    width: logo.width,
+    height: logo.height,
+    opacity: WATERMARK_LOGO_OPACITY,
+  });
+
+  return watermarkDocument.save({ useObjectStreams: true });
+}
+
+export async function addPhoneWatermarkWithAssets(
+  source: ArrayBuffer,
+  phone: string,
+  fontBytes: ArrayBuffer,
+  logoBytes: ArrayBuffer,
+): Promise<Uint8Array> {
   const document = await PDFDocument.load(source, { ignoreEncryption: false, updateMetadata: false });
-  document.registerFontkit(fontkit);
-  const font = await document.embedFont(fontBytes, { subset: true });
+  const [watermarkPage] = await document.embedPdf(await createWatermarkPage(phone, fontBytes, logoBytes), [0]);
 
   for (const page of document.getPages()) {
     const { width, height } = page.getSize();
-    const fontSize = Math.max(34, Math.min(66, Math.min(width, height) * 0.085));
-    const opacity = 0.035;
-    page.drawText("祝考试好运 UPUP", {
-      x: width * 0.13,
-      y: height * 0.35,
-      size: fontSize,
-      font,
-      color: rgb(0.08, 0.08, 0.08),
-      opacity,
-      rotate: degrees(45),
-    });
-    page.drawText(phone, {
-      x: width * 0.22,
-      y: height * 0.17,
-      size: fontSize,
-      font,
-      color: rgb(0.08, 0.08, 0.08),
-      opacity,
-      rotate: degrees(45),
-    });
+    page.drawPage(watermarkPage, { x: 0, y: 0, width, height });
   }
 
   return document.save({ useObjectStreams: true });

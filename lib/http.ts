@@ -29,9 +29,39 @@ export function clientIp(request: Request): string {
   return request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
 }
 
+function firstHeaderValue(value: string | null): string | null {
+  return value?.split(",", 1)[0]?.trim() || null;
+}
+
+export function requestPublicOrigin(request: Request): string {
+  const internalUrl = new URL(request.url);
+  const host = firstHeaderValue(request.headers.get("host"))
+    ?? firstHeaderValue(request.headers.get("x-forwarded-host"))
+    ?? internalUrl.host;
+  const forwardedProtocol = firstHeaderValue(request.headers.get("x-forwarded-proto"))?.toLowerCase();
+  const protocol = forwardedProtocol === "http" || forwardedProtocol === "https"
+    ? `${forwardedProtocol}:`
+    : internalUrl.protocol;
+
+  try {
+    return new URL(`${protocol}//${host}`).origin;
+  } catch {
+    throw new HttpError(400, "请求地址无效", "INVALID_REQUEST_ORIGIN");
+  }
+}
+
+export function requestIsSecure(request: Request): boolean {
+  return requestPublicOrigin(request).startsWith("https://");
+}
+
 export function assertSameOrigin(request: Request): void {
   const origin = request.headers.get("origin");
-  if (origin && new URL(origin).host !== new URL(request.url).host) throw new HttpError(403, "请求来源无效", "INVALID_ORIGIN");
+  if (!origin) return;
+  try {
+    if (new URL(origin).origin !== requestPublicOrigin(request)) throw new Error("origin mismatch");
+  } catch {
+    throw new HttpError(403, "请求来源无效", "INVALID_ORIGIN");
+  }
 }
 
 export function parseCookies(request: Request): Map<string, string> {
