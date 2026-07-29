@@ -75,7 +75,7 @@ export function BuyerPortal({ token }: { token: string }) {
   useEffect(() => {
     if (window.location.hash !== "#auth-required") return;
     window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
-    const showTimer = window.setTimeout(() => setToast("验证手机号和订单号，下载专属你的突击资料"), 0);
+    const showTimer = window.setTimeout(() => setToast("验证手机号和订单号，领取专属备考资料"), 0);
     const hideTimer = window.setTimeout(() => setToast(""), 5_000);
     return () => {
       window.clearTimeout(showTimer);
@@ -105,16 +105,16 @@ export function BuyerPortal({ token }: { token: string }) {
 
   const phaseNote = useMemo(() => {
     if (!status) return "";
-    if (status.phase === "GENERATION_OPEN") return `专属文件生成还剩 ${remainingText(status.generationDeadline)}`;
-    if (status.phase === "DOWNLOAD_ONLY") return `已生成用户下载还剩 ${remainingText(status.expiresAt)}`;
-    return "本期资料链接已经结束";
+    if (status.phase === "GENERATION_OPEN") return `专属文件生成通道剩余 ${remainingText(status.generationDeadline)}`;
+    if (status.phase === "DOWNLOAD_ONLY") return `文件下载有效期剩余 ${remainingText(status.expiresAt)}`;
+    return "本期资料领取通道已结束";
   }, [status]);
 
   async function sendCode() {
     setError("");
     setNotice("");
     if (!/^1[3-9]\d{9}$/.test(phone)) {
-      setError("请输入正确的11位中国大陆手机号");
+      setError("请填写有效的11位中国大陆手机号");
       return;
     }
     setSending(true);
@@ -127,7 +127,7 @@ export function BuyerPortal({ token }: { token: string }) {
       const data = await response.json() as { error?: string; message?: string; devCode?: string };
       if (!response.ok) throw new Error(data.error ?? "验证码发送失败");
       setCooldown(60);
-      setNotice(data.devCode ? `开发预览验证码：${data.devCode}` : "验证码已发送，请查看短信");
+      setNotice(data.devCode ? `开发预览验证码：${data.devCode}` : "验证码已发出，请留意短信");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "验证码发送失败");
     } finally {
@@ -151,7 +151,7 @@ export function BuyerPortal({ token }: { token: string }) {
       if (!response.ok) throw new Error(data.error ?? "专属文件生成失败");
       setProgress(100);
       const next = await loadStatus();
-      if (data.state === "GENERATING" || !next.ready) setNotice("文件正在生成，页面会自动更新");
+      if (data.state === "GENERATING" || !next.ready) setNotice("正在打包资料，页面会自动刷新，请稍等");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "专属文件生成失败");
     } finally {
@@ -160,7 +160,7 @@ export function BuyerPortal({ token }: { token: string }) {
   }
 
   if (loading) {
-    return <main className="portal-loading"><LoaderCircle className="spin" /><p>正在打开你的宝藏资料…</p></main>;
+    return <main className="portal-loading"><LoaderCircle className="spin" /><p>正在打开你的备考宝藏…</p></main>;
   }
 
   if (!status || status.phase === "EXPIRED") {
@@ -169,8 +169,8 @@ export function BuyerPortal({ token }: { token: string }) {
         <section className="expired-card">
           <div className="icon-orb"><Clock3 /></div>
           <span className="eyebrow">小圆 PTE 突击</span>
-          <h1>这份宝藏资料已领取</h1>
-          <p>{error || "链接已失效，有问题请直接联系小圆。"}</p>
+          <h1>这份备考资料领取通道已结束</h1>
+          <p>{error || "链接已失效，有任何问题欢迎联系小圆。"}</p>
         </section>
       </main>
     );
@@ -188,15 +188,15 @@ export function BuyerPortal({ token }: { token: string }) {
       <div className="confetti confetti-three" />
       <header className="portal-nav">
         <Image src="/brand/xiaoyuan-pte.png" alt="小圆 PTE 突击" width={48} height={48} priority />
-        <div><strong>小圆 PTE 突击</strong><span>专属资料提取站</span></div>
+        <div><strong>小圆 PTE 突击</strong><span>专属资料领取站</span></div>
         <div className="secure-chip"><ShieldCheck size={16} /> 安全验证</div>
       </header>
 
       <section className="portal-layout">
         <div className="portal-hero">
           <span className="eyebrow"><Sparkles size={15} /> PURCHASE UNLOCKED</span>
-          <h1>恭喜宝宝<br />解锁 <em>{status.entryMeta.label}</em> 宝藏资料</h1>
-          <p className="hero-copy">{status.entryMeta.description}。验证成功后，就可以带走你的专属资料啦。</p>
+          <h1>恭喜你<br />解锁 <em>{status.entryMeta.label}</em> 宝藏资料</h1>
+          <p className="hero-copy">{status.entryMeta.description}。完成身份验证，就能领取你的专属资料啦。</p>
           <div className="treasure-ticket">
             <div className="ticket-icon"><Gift /></div>
             <div><span>本期资料</span><strong>{status.versionName}</strong></div>
@@ -204,7 +204,7 @@ export function BuyerPortal({ token }: { token: string }) {
           </div>
           <div className="promise-row">
             <span><CheckCircle2 /> </span>
-            <span><CheckCircle2 /> 原文件重复下载</span>
+            <span><CheckCircle2 /> 原文件支持重复下载</span>
             <span><CheckCircle2 /> 登录状态自动保存</span>
           </div>
         </div>
@@ -213,16 +213,16 @@ export function BuyerPortal({ token }: { token: string }) {
           {ready ? (
             <div className="ready-state">
               <div className="success-mark"><PackageCheck /></div>
-              <span className="step-kicker">专属文件准备好啦</span>
-              <h2>宝藏已装进你的口袋</h2>
-              <p>{status.phone ? `已验证手机 ${status.phone}` : "身份验证已完成"}，记得保存好你的文件哦！</p>
+              <span className="step-kicker">专属资料已经准备就绪</span>
+              <h2>备考宝藏已为你备好</h2>
+              <p>{status.phone ? `已验证手机 ${status.phone}` : "身份验证已完成"}，记得保存好你的专属文件哦！</p>
               <div className="file-tile">
                 <FileArchive />
                 <div><strong>{status.filename}</strong><span>生成于 {status.generatedAt ? new Date(status.generatedAt).toLocaleString("zh-CN") : "刚刚"}</span></div>
                 <CheckCircle2 className="file-check" />
               </div>
               <a className="primary-button download-button" href={`/api/public/${token}/download`}>
-                <Download /> 下载我的专属文件
+                <Download /> 下载我的专属资料
               </a>
               <p className="fine-print"><LockKeyhole /> 请及时保存文件哦</p>
             </div>
@@ -254,14 +254,14 @@ export function BuyerPortal({ token }: { token: string }) {
                 <input id="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))} placeholder="6位验证码" />
                 <button type="button" onClick={sendCode} disabled={sending || cooldown > 0}>{sending ? "发送中" : cooldown > 0 ? `${cooldown}s` : "获取验证码"}</button>
               </div>
-              <p className="field-help">验证码来源【成都原石闪闪科技】</p>
+              <p className="field-help">短信发送方：【成都原石闪闪科技】</p>
 
               <label className="field-label" htmlFor="order">小红书订单号</label>
               <div className="input-shell">
                 <PackageCheck size={19} />
-                <input id="order" autoCapitalize="characters" autoComplete="off" maxLength={19} value={orderNumber} onChange={(event) => setOrderNumber(event.target.value.trim().toUpperCase())} placeholder="P开头的19位订单号" />
+                <input id="order" autoCapitalize="characters" autoComplete="off" maxLength={19} value={orderNumber} onChange={(event) => setOrderNumber(event.target.value.trim().toUpperCase())} placeholder="P开头19位订单号" />
               </div>
-              <p className="field-help">请从小红书订单详情复制，首次提交后会与手机号绑定。</p>
+              <p className="field-help">从小红书订单详情复制，首次提交后手机号将会和该订单绑定。</p>
 
               {notice && <div className="form-notice success-notice">{notice}</div>}
               {error && <div className="form-notice error-notice" role="alert">{error}</div>}
@@ -269,7 +269,7 @@ export function BuyerPortal({ token }: { token: string }) {
               <button className="primary-button" type="submit">
                 {status.phase === "DOWNLOAD_ONLY" ? "登录并查看文件" : "生成我的专属文件"}<ArrowRight />
               </button>
-              <p className="privacy-note"><LockKeyhole /> 为生成和保护专属资料，系统将保存手机号和订单号，并为你生成专属资料哦！加油好好复习，祝考试顺利哦！</p>
+              <p className="privacy-note"><LockKeyhole /> 为创建与保护专属资料，系统将保存手机号与订单信息；加油好好复习，祝考试顺利哦！</p>
             </form>
           )}
         </section>
