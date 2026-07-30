@@ -3,6 +3,7 @@
 /.npm-cache/
 /.openai/
 /.next/
+/next-env.d.ts
 /.vinext/
 /dist/
 /.wrangler/
