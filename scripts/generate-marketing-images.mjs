@@ -28,7 +28,7 @@ const repositoryRoot = resolve(scriptDirectory, "..");
 const marketingRoot = resolve(repositoryRoot, "marketing");
 const defaultOutputDirectory = resolve(marketingRoot, "detail-page-images");
 
-export const PRODUCTS = ["wfd", "di", "sst", "rs", "we"];
+export const PRODUCTS = ["wfd", "di", "sst", "rs", "we", "bundle"];
 
 export function buildSlicePlan(contentHeight, sliceHeight) {
   if (!Number.isFinite(contentHeight) || contentHeight <= 0) {
@@ -122,7 +122,7 @@ export function parseCliArgs(argv) {
 }
 
 function printHelp() {
-  console.log(`Generate continuous vertical PNGs from the five marketing HTML pages.
+  console.log(`Generate continuous vertical PNGs from the six marketing HTML pages.
 
 Usage:
   npm run marketing:images

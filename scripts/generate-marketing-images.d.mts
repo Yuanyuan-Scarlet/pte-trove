@@ -1,4 +1,4 @@
-export const PRODUCTS: readonly ["wfd", "di", "sst", "rs", "we"];
+export const PRODUCTS: readonly ["wfd", "di", "sst", "rs", "we", "bundle"];
 
 export type MarketingProduct = (typeof PRODUCTS)[number];
 

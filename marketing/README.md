@@ -2,15 +2,15 @@
 
 > 本文档由 AI 辅助整理，并由项目负责人审核。
 
-`marketing/` 保存小圆 PTE 商品展示素材，包括六张商品主图、五个题型 HTML 详情页、供商家后台直接上传的连续竖图，以及 PTE Academic 全题型简介图。
+`marketing/` 保存小圆 PTE 商品展示素材，包括六张商品主图、五个题型与一个五项合集 HTML 详情页、供商家后台直接上传的连续竖图，以及 PTE Academic 全题型简介图。
 
 ## 目录结构
 
 | 路径 | 用途 |
 | --- | --- |
 | `product-images/` | WFD、DI、SST、RS、WE 和五项合集商品主图 |
-| `detail-pages/` | 五个题型的 HTML 详情页、共享样式和页面内展示截图 |
-| `detail-page-images/` | 从五个 HTML 详情页生成的商家后台连续竖图 |
+| `detail-pages/` | 五个题型与五项合集的 HTML 详情页、共享样式和页面内展示截图 |
+| `detail-page-images/` | 从六个 HTML 详情页生成的商家后台连续竖图 |
 | `pte-academic-question-types/` | 22 个计分题型与 Personal Introduction 的核对稿、数据源和 4:3 简介图 |
 | `../scripts/generate-marketing-images.mjs` | 竖图生成脚本 |
 | `../scripts/generate-pte-question-cards.mjs` | PTE Academic 全题型简介图生成脚本 |
@@ -27,7 +27,7 @@ PTE Academic 全题型资料以 `pte-academic-question-types/question-types.json
 npm run marketing:images
 ```
 
-脚本依次处理 WFD、DI、SST、RS 和 WE，默认输出到 `marketing/detail-page-images/`：
+脚本依次处理 WFD、DI、SST、RS、WE 和五项合集，默认输出到 `marketing/detail-page-images/`：
 
 ```text
 wfd-01.png
@@ -36,6 +36,8 @@ wfd-02.png
 di-01.png
 ...
 we-04.png
+bundle-01.png
+...
 ```
 
 默认规则：
@@ -114,4 +116,4 @@ npm run marketing:images
 
 ## 商家后台上传
 
-同一题型按文件编号从小到大上传，例如 WFD 使用 `wfd-01.png`、`wfd-02.png`、`wfd-03.png`、`wfd-04.png`。五个题型分别维护自己的图片序列，HTML 页面长度变化后，输出张数可能随之变化，应以最新一次生成结果为准。
+同一商品按文件编号从小到大上传，例如 WFD 使用 `wfd-01.png`、`wfd-02.png`、`wfd-03.png`、`wfd-04.png`。五个题型与五项合集分别维护自己的图片序列，HTML 页面长度变化后，输出张数可能随之变化，应以最新一次生成结果为准。
