@@ -155,7 +155,7 @@ function executableFromPath(names) {
   return "";
 }
 
-function resolveBrowserPath(explicitPath) {
+export function resolveBrowserPath(explicitPath) {
   if (explicitPath) {
     const resolvedPath = resolve(explicitPath);
     if (!existsSync(resolvedPath)) {
@@ -234,7 +234,7 @@ async function waitForDevTools(profileDirectory, browserProcess, stderr) {
   throw new Error(`Timed out while starting the browser.\n${stderr()}`);
 }
 
-async function launchBrowser(browserPath) {
+export async function launchBrowser(browserPath) {
   const profileDirectory = mkdtempSync(join(tmpdir(), "prep-trove-marketing-"));
   const browserProcess = spawn(
     browserPath,
@@ -312,7 +312,7 @@ class CdpClient {
   }
 }
 
-async function connectCdp(webSocketUrl) {
+export async function connectCdp(webSocketUrl) {
   const socket = new WebSocket(webSocketUrl);
   await new Promise((resolvePromise, rejectPromise) => {
     socket.addEventListener("open", resolvePromise, { once: true });
@@ -325,7 +325,7 @@ async function connectCdp(webSocketUrl) {
   return new CdpClient(socket);
 }
 
-async function createPage(port) {
+export async function createPage(port) {
   const response = await fetch(`http://127.0.0.1:${port}/json/new?about%3Ablank`, {
     method: "PUT",
   });
@@ -335,7 +335,7 @@ async function createPage(port) {
   return response.json();
 }
 
-async function waitForDocument(cdp, expectedUrl) {
+export async function waitForDocument(cdp, expectedUrl) {
   const deadline = Date.now() + 15_000;
   while (Date.now() < deadline) {
     const result = await cdp.send("Runtime.evaluate", {
@@ -436,7 +436,7 @@ async function renderProduct(cdp, product, options) {
   };
 }
 
-async function closeBrowser(browser) {
+export async function closeBrowser(browser) {
   try {
     const browserCdp = await connectCdp(browser.browserWebSocketUrl);
     await browserCdp.send("Browser.close");

@@ -1,0 +1,1139 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PTE Academic 全部题型简介图</title>
+  <style>
+    @font-face{font-family:"Noto Sans SC";src:url("../../node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff2") format("woff2");font-style:normal;font-weight:400;font-display:swap}
+    @font-face{font-family:"Noto Sans SC";src:url("../../node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-600-normal.woff2") format("woff2");font-style:normal;font-weight:600 900;font-display:swap}
+    *{box-sizing:border-box}
+    html,body{margin:0;background:#DDD7CF;color:#29252D;font-family:"Noto Sans SC","Microsoft YaHei",Arial,sans-serif}
+    body{padding:48px;display:flex;flex-direction:column;align-items:flex-start;gap:40px}
+    .question-card{position:relative;width:1200px;height:900px;overflow:hidden;background:#FFFCF8;border-radius:0;isolation:isolate}
+    .question-card::before{content:"";position:absolute;inset:0 0 auto 0;height:12px;background:var(--accent);z-index:3}
+    .orb{position:absolute;border-radius:999px;z-index:-1;pointer-events:none}
+    .orb-one{width:360px;height:360px;right:-150px;top:-170px;background:var(--pale)}
+    .orb-two{width:260px;height:260px;left:-120px;bottom:-150px;background:var(--pale)}
+    .card-header{height:122px;padding:31px 56px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E8E1D9}
+    .brand{display:flex;align-items:center;gap:14px}
+    .brand img{width:58px;height:58px;object-fit:contain;border-radius:50%;background:#fff;box-shadow:0 4px 16px rgba(37,28,48,.12)}
+    .brand div{display:flex;flex-direction:column;gap:1px}
+    .brand strong{font-size:21px;line-height:1.3;letter-spacing:.02em}
+    .brand small{font-size:13px;color:#817A83;letter-spacing:.08em}
+    .part-pill{padding:11px 18px;border-radius:999px;background:var(--pale);color:var(--accent);font-size:16px;font-weight:700;letter-spacing:.03em}
+    .card-content{height:706px;padding:44px 56px 32px;display:grid;grid-template-columns:1.07fr .93fr;gap:44px}
+    .overview{min-width:0;display:flex;flex-direction:column}
+    .eyebrow{display:flex;align-items:center;gap:10px;color:var(--accent);font-size:13px;font-weight:800;letter-spacing:.15em}
+    .eyebrow span{display:grid;place-items:center;min-width:38px;height:28px;padding:0 8px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;letter-spacing:.03em}
+    h1{margin:18px 0 0;font-family:Arial,"Noto Sans SC",sans-serif;font-size:49px;line-height:1.08;letter-spacing:-.035em;color:#28232D}
+    h2{margin:7px 0 0;color:var(--accent);font-size:27px;line-height:1.3;font-weight:700}
+    .task-block{margin-top:32px;padding-left:20px;border-left:5px solid var(--accent)}
+    .task-block h3,.scoring h3{margin:0 0 10px;font-size:22px;line-height:1.3}
+    .task-block p{margin:0;color:#514B55;font-size:20px;line-height:1.68}
+    .facts{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .facts div{min-height:84px;padding:14px 16px;border:1px solid #E6DED5;border-radius:14px;background:rgba(255,255,255,.8);display:flex;flex-direction:column;gap:6px}
+    .facts div:first-child{grid-column:1/-1}
+    .facts small{color:#8A8288;font-size:13px;font-weight:600;letter-spacing:.06em}
+    .facts strong{font-size:16px;line-height:1.45;color:#37313A}
+    .scoring{align-self:stretch;padding:30px 30px 26px;border-radius:26px;background:#2E2933;color:#fff;display:flex;flex-direction:column;box-shadow:0 20px 45px rgba(47,40,55,.14)}
+    .scoring-topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
+    .scoring-topline>span{font-family:Arial,sans-serif;color:#BDB5C3;font-size:12px;font-weight:700;letter-spacing:.18em}
+    .scoring-topline b{padding:7px 12px;border-radius:999px;background:var(--accent);font-size:13px;letter-spacing:.03em}
+    .scoring h3{font-size:27px;margin-bottom:16px}
+    .trait-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+    .trait-tags span{padding:7px 11px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:rgba(255,255,255,.08);font-size:13px;line-height:1.25}
+    .scoring-copy{margin:0;color:#EEE9F1;font-size:17px;line-height:1.7}
+    .rules-box{margin-top:auto;padding:19px 20px 17px;border-radius:18px;background:#FFFCF8;color:#352F38}
+    .rules-box h4{margin:0 0 13px;color:var(--accent);font-size:16px;letter-spacing:.06em}
+    .rules-box ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+    .rules-box li{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.42}
+    .rules-box li b{flex:0 0 23px;height:23px;border-radius:50%;display:grid;place-items:center;background:var(--pale);color:var(--accent);font-size:12px}
+    footer{height:72px;padding:0 56px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #E8E1D9;color:#9A9399;font-size:12px;letter-spacing:.025em}
+    footer span:last-child{color:#B0A9AE;font-family:Arial,"Noto Sans SC",sans-serif;letter-spacing:.08em}
+  </style>
+</head>
+<body>
+
+    <article
+      class="question-card"
+      id="card-personal-introduction"
+      data-filename="p1-00-personal-introduction.png"
+      style="--accent:#6F4CB3;--pale:#F0EAFC;--soft:#DFD2F7"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 1 · 口语与写作</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>INTRO</span> QUESTION TYPE</div>
+          <h1>Personal Introduction</h1>
+          <h2>个人介绍（不计分）</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>阅读屏幕提示后录制一段自我介绍，用来熟悉考试中的录音界面。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>25 秒准备</strong></div>
+            <div><small>作答时间</small><strong>30 秒录音</strong></div>
+            <div><small>计分技能</small><strong>不计入成绩</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>熟悉环节</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>不参与计分</span><span>单次录音</span></div>
+          <p class="scoring-copy">录音不会计入任何技能分数；这一环节只帮助考生熟悉麦克风和作答流程。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>准备时间为 25 秒</span></li><li><b>2</b><span>随后录音 30 秒</span></li><li><b>3</b><span>只能录制一次</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>INTRO / P1 · 口语与写作</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-read-aloud"
+      data-filename="p1-01-read-aloud.png"
+      style="--accent:#6F4CB3;--pale:#F0EAFC;--soft:#DFD2F7"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 1 · 口语与写作</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>01</span> QUESTION TYPE</div>
+          <h1>Read Aloud</h1>
+          <h2>朗读文本</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>看到一段英文文本后，按原文把内容清楚、连贯地朗读出来。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>文本不超过 60 词</strong></div>
+            <div><small>作答时间</small><strong>准备 30–40 秒；录音时限随题目变化</strong></div>
+            <div><small>计分技能</small><strong>阅读 + 口语</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>内容</span><span>发音</span><span>口语流利度</span></div>
+          <p class="scoring-copy">正确朗读原文词语可获得内容分；替换、插入或漏读会影响内容分，并分别评估发音与流利度。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>麦克风开启后立即作答</span></li><li><b>2</b><span>保持原词序，不增词漏词</span></li><li><b>3</b><span>停顿、节奏和重音要自然</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>01 / P1 · 口语与写作</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-repeat-sentence"
+      data-filename="p1-02-repeat-sentence.png"
+      style="--accent:#6F4CB3;--pale:#F0EAFC;--soft:#DFD2F7"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 1 · 口语与写作</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>02</span> QUESTION TYPE</div>
+          <h1>Repeat Sentence</h1>
+          <h2>复述句子</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>听一遍短句，在提示音后尽可能准确地按原顺序复述整句。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>录音 3–9 秒，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>15 秒</strong></div>
+            <div><small>计分技能</small><strong>听力 + 口语</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>内容</span><span>发音</span><span>口语流利度</span></div>
+          <p class="scoring-copy">内容分依据正确词语及其连续顺序；同时评估发音和口语流利度。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>音频只播放一次</span></li><li><b>2</b><span>提示音后立即复述</span></li><li><b>3</b><span>每题只录制一次</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>02 / P1 · 口语与写作</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-describe-image"
+      data-filename="p1-03-describe-image.png"
+      style="--accent:#6F4CB3;--pale:#F0EAFC;--soft:#DFD2F7"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 1 · 口语与写作</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>03</span> QUESTION TYPE</div>
+          <h1>Describe Image</h1>
+          <h2>描述图片</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>观察图表、图片或示意图，并用自己的话有条理地描述关键信息。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>一张视觉材料</strong></div>
+            <div><small>作答时间</small><strong>准备 25 秒；作答 40 秒</strong></div>
+            <div><small>计分技能</small><strong>口语</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>内容</span><span>发音</span><span>口语流利度</span></div>
+          <p class="scoring-copy">内容要与图片相关并覆盖主要信息；另按发音和流利度评分。无关、照搬或未作答可能不得分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>只录制一次</span></li><li><b>2</b><span>优先概括主题和显著特征</span></li><li><b>3</b><span>必须使用自己的表述</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>03 / P1 · 口语与写作</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-retell-lecture"
+      data-filename="p1-04-retell-lecture.png"
+      style="--accent:#6F4CB3;--pale:#F0EAFC;--soft:#DFD2F7"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 1 · 口语与写作</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>04</span> QUESTION TYPE</div>
+          <h1>Retell Lecture</h1>
+          <h2>复述讲座</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>听完一段讲座后，用自己的话复述主题、主要观点和重要细节。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>音频最长 90 秒，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>准备 10 秒；作答 40 秒</strong></div>
+            <div><small>计分技能</small><strong>听力 + 口语</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>内容</span><span>发音</span><span>口语流利度</span></div>
+          <p class="scoring-copy">内容看复述是否准确覆盖讲座要点；另评估发音和流利度。无关、照搬或未作答可能不得分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>可边听边记笔记</span></li><li><b>2</b><span>有时会同时显示相关图片</span></li><li><b>3</b><span>用自己的话组织信息</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>04 / P1 · 口语与写作</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-answer-short-question"
+      data-filename="p1-05-answer-short-question.png"
+      style="--accent:#6F4CB3;--pale:#F0EAFC;--soft:#DFD2F7"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 1 · 口语与写作</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>05</span> QUESTION TYPE</div>
+          <h1>Answer Short Question</h1>
+          <h2>回答简短问题</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>听一个日常知识类短问题，用一个词或几个词直接给出准确答案。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>音频 3–9 秒，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>10 秒</strong></div>
+            <div><small>计分技能</small><strong>听力</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>正误计分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>答案准确</span><span>表达简短</span></div>
+          <p class="scoring-copy">简短、准确且符合问题的回答得分；错误、无关或未作答不得分。说得更长不会获得额外分数。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>没有开始提示音</span></li><li><b>2</b><span>录音会在问题结束后立即开启</span></li><li><b>3</b><span>用一个词或几个词回答即可</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>05 / P1 · 口语与写作</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-summarize-group-discussion"
+      data-filename="p1-06-summarize-group-discussion.png"
+      style="--accent:#6F4CB3;--pale:#F0EAFC;--soft:#DFD2F7"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 1 · 口语与写作</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>06</span> QUESTION TYPE</div>
+          <h1>Summarize Group Discussion</h1>
+          <h2>总结小组讨论</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>听三人讨论后，概括共同主题、各方观点及观点之间的关系。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>讨论最长 3 分钟，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>准备 10 秒；作答 2 分钟</strong></div>
+            <div><small>计分技能</small><strong>听力 + 口语</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>内容</span><span>发音</span><span>口语流利度</span></div>
+          <p class="scoring-copy">内容看是否覆盖主题、分论点、说话人观点及其联系；另评估发音和流利度。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>需要体现不同说话人的观点</span></li><li><b>2</b><span>说明观点间的联系</span></li><li><b>3</b><span>使用自己的话总结</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>06 / P1 · 口语与写作</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-respond-to-a-situation"
+      data-filename="p1-07-respond-to-a-situation.png"
+      style="--accent:#6F4CB3;--pale:#F0EAFC;--soft:#DFD2F7"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 1 · 口语与写作</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>07</span> QUESTION TYPE</div>
+          <h1>Respond to a Situation</h1>
+          <h2>情景应答</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>听读一个具体情景，并以合适身份、语气和目的作出完整口头回应。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>文字不超过 60 词，并播放一次</strong></div>
+            <div><small>作答时间</small><strong>准备 10 秒；作答 40 秒</strong></div>
+            <div><small>计分技能</small><strong>口语</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>内容</span><span>发音</span><span>口语流利度</span></div>
+          <p class="scoring-copy">内容看回应是否相关、准确、有效且语体合适；另评估发音和流利度。无关或未作答不得分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>明确自己和对方的身份</span></li><li><b>2</b><span>完成情景要求的沟通目的</span></li><li><b>3</b><span>使用与场合匹配的表达</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>07 / P1 · 口语与写作</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-summarize-written-text"
+      data-filename="p1-08-summarize-written-text.png"
+      style="--accent:#6F4CB3;--pale:#F0EAFC;--soft:#DFD2F7"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 1 · 口语与写作</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>08</span> QUESTION TYPE</div>
+          <h1>Summarize Written Text</h1>
+          <h2>概括书面文本</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>阅读学术短文，将中心思想和关键支撑信息压缩成一个完整句子。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>文本不超过 300 词</strong></div>
+            <div><small>作答时间</small><strong>10 分钟</strong></div>
+            <div><small>计分技能</small><strong>阅读 + 写作</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>多维评分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>内容</span><span>格式</span><span>语法</span><span>词汇</span></div>
+          <p class="scoring-copy">按内容、格式、语法和词汇评分。答案必须只有一句，并控制在 5–75 词；越界会使所有评分项为零。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>只写一个完整句子</span></li><li><b>2</b><span>答案需为 5–75 词</span></li><li><b>3</b><span>覆盖主旨与关键支撑信息</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>08 / P1 · 口语与写作</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-write-essay"
+      data-filename="p1-09-write-essay.png"
+      style="--accent:#6F4CB3;--pale:#F0EAFC;--soft:#DFD2F7"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 1 · 口语与写作</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>09</span> QUESTION TYPE</div>
+          <h1>Write Essay</h1>
+          <h2>写作议论文</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>根据简短题目写一篇有明确立场、论证充分且结构连贯的议论文。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>题目 2–3 句</strong></div>
+            <div><small>作答时间</small><strong>20 分钟</strong></div>
+            <div><small>计分技能</small><strong>写作</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>多维评分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>内容</span><span>结构连贯</span><span>格式</span><span>语言范围</span><span>语法</span><span>词汇</span><span>拼写</span></div>
+          <p class="scoring-copy">目标字数为 200–300 词；少于 120 词或多于 380 词会使所有评分项为零，其余按七项标准评分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>建议写 200–300 词</span></li><li><b>2</b><span>回应题目并形成论证</span></li><li><b>3</b><span>检查结构、语法与拼写</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>09 / P1 · 口语与写作</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-reading-fill-blanks-dropdown"
+      data-filename="p2-01-fill-blanks-dropdown.png"
+      style="--accent:#157F85;--pale:#E8F7F5;--soft:#CFEDEA"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 2 · 阅读</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>01</span> QUESTION TYPE</div>
+          <h1>Fill in the Blanks (Dropdown)</h1>
+          <h2>阅读填空（下拉选择）</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>阅读带空格的文章，从每个空格的下拉选项中选择最合适的词。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>文本不超过 300 词</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>阅读</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>语境</span><span>语法</span><span>词义搭配</span></div>
+          <p class="scoring-copy">全部空格正确可获本题最高分；部分空格错误时仍按正确答案获得部分分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>每个空格独立选择</span></li><li><b>2</b><span>结合上下文和语法判断</span></li><li><b>3</b><span>留意固定搭配与词义差别</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>01 / P2 · 阅读</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-reading-multiple-choice-multiple-answers"
+      data-filename="p2-02-multiple-choice-multiple-answers.png"
+      style="--accent:#157F85;--pale:#E8F7F5;--soft:#CFEDEA"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 2 · 阅读</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>02</span> QUESTION TYPE</div>
+          <h1>Multiple Choice, Multiple Answers</h1>
+          <h2>阅读多选题（多个答案）</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>阅读文章并根据内容或语气，从多个选项中选出所有正确答案。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>文本不超过 350 词</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>阅读</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>带扣分的部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>正确选项得分</span><span>错误选择扣分</span></div>
+          <p class="scoring-copy">选中的正确选项可得分，选中的错误选项会扣减本题得分；应只选择有把握的答案。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>正确答案不止一个</span></li><li><b>2</b><span>需要选出全部正确项</span></li><li><b>3</b><span>误选会产生分数损失</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>02 / P2 · 阅读</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-reorder-paragraph"
+      data-filename="p2-03-reorder-paragraph.png"
+      style="--accent:#157F85;--pale:#E8F7F5;--soft:#CFEDEA"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 2 · 阅读</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>03</span> QUESTION TYPE</div>
+          <h1>Reorder Paragraph</h1>
+          <h2>段落排序</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>把随机排列的文本框拖到正确位置，还原原文的逻辑顺序。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>文本不超过 150 词</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>阅读</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>篇章组织</span><span>衔接连贯</span></div>
+          <p class="scoring-copy">全部文本框顺序正确可获本题最高分；部分顺序错误时仍适用部分得分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>先找主题句</span></li><li><b>2</b><span>利用代词、连接词和逻辑关系</span></li><li><b>3</b><span>最终检查整段是否连贯</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>03 / P2 · 阅读</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-reading-fill-blanks-drag-drop"
+      data-filename="p2-04-fill-blanks-drag-drop.png"
+      style="--accent:#157F85;--pale:#E8F7F5;--soft:#CFEDEA"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 2 · 阅读</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>04</span> QUESTION TYPE</div>
+          <h1>Fill in the Blanks (Drag and Drop)</h1>
+          <h2>阅读填空（拖拽）</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>从备选词框中拖动词语填入文章空格；备选词数量多于空格。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>文本不超过 80 词</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>阅读</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>语境</span><span>语法</span><span>词语搭配</span></div>
+          <p class="scoring-copy">全部空格正确可获本题最高分；部分空格错误时仍按正确答案获得部分分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>有多余备选词</span></li><li><b>2</b><span>可在空格间调整答案</span></li><li><b>3</b><span>结合词性、搭配和上下文判断</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>04 / P2 · 阅读</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-reading-multiple-choice-single-answer"
+      data-filename="p2-05-multiple-choice-single-answer.png"
+      style="--accent:#157F85;--pale:#E8F7F5;--soft:#CFEDEA"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 2 · 阅读</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>05</span> QUESTION TYPE</div>
+          <h1>Multiple Choice, Single Answer</h1>
+          <h2>阅读单选题</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>阅读短文，分析题目要求，并从多个选项中选出唯一正确答案。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>文本不超过 300 词</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>阅读</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>正误计分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>唯一正确答案</span></div>
+          <p class="scoring-copy">选择正确答案得分；选错或未作答不得分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>只有一个正确选项</span></li><li><b>2</b><span>先确认题目问的是主旨、细节或推断</span></li><li><b>3</b><span>可在提交前更换选择</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>05 / P2 · 阅读</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-summarize-spoken-text"
+      data-filename="p3-01-summarize-spoken-text.png"
+      style="--accent:#B85C31;--pale:#FFF0E5;--soft:#F9D7C3"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 3 · 听力</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>01</span> QUESTION TYPE</div>
+          <h1>Summarize Spoken Text</h1>
+          <h2>概括口述文本</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>听一段录音后，用一段文字概括主要观点及重要支撑信息。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>音频 60–90 秒，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>10 分钟</strong></div>
+            <div><small>计分技能</small><strong>听力 + 写作</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>多维评分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>内容</span><span>格式</span><span>语法</span><span>词汇</span><span>拼写</span></div>
+          <p class="scoring-copy">目标字数为 50–70 词；少于 40 词或多于 100 词会使所有评分项为零，其余按五项标准评分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>建议写 50–70 词</span></li><li><b>2</b><span>记录主题和关键支撑点</span></li><li><b>3</b><span>检查语法、词汇与拼写</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>01 / P3 · 听力</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-listening-multiple-choice-multiple-answers"
+      data-filename="p3-02-multiple-choice-multiple-answers.png"
+      style="--accent:#B85C31;--pale:#FFF0E5;--soft:#F9D7C3"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 3 · 听力</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>02</span> QUESTION TYPE</div>
+          <h1>Multiple Choice, Multiple Answers</h1>
+          <h2>听力多选题（多个答案）</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>听完录音后，从多个选项中选出所有符合录音内容的答案。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>音频 80–120 秒，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>听力</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>带扣分的部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>正确选项得分</span><span>错误选择扣分</span></div>
+          <p class="scoring-copy">选中的正确选项可得分，选中的错误选项会扣减本题得分；应只选择有把握的答案。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>正确答案不止一个</span></li><li><b>2</b><span>音频自动播放且只有一次</span></li><li><b>3</b><span>误选会产生分数损失</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>02 / P3 · 听力</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-listening-fill-blanks-type-in"
+      data-filename="p3-03-fill-blanks-type-in.png"
+      style="--accent:#B85C31;--pale:#FFF0E5;--soft:#F9D7C3"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 3 · 听力</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>03</span> QUESTION TYPE</div>
+          <h1>Fill in the Blanks (Type In)</h1>
+          <h2>听力填空（键入）</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>边听录音边阅读屏幕文本，把录音中出现而文本里缺失的词键入空格。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>音频 30–60 秒，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>听力 + 写作</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>逐空部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>词语准确</span><span>拼写正确</span></div>
+          <p class="scoring-copy">每个填写正确且拼写无误的词获得一分；部分空格错误时仍可获得部分分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>音频自动播放且只有一次</span></li><li><b>2</b><span>答案必须与录音词语一致</span></li><li><b>3</b><span>最后检查拼写</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>03 / P3 · 听力</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-highlight-correct-summary"
+      data-filename="p3-04-highlight-correct-summary.png"
+      style="--accent:#B85C31;--pale:#FFF0E5;--soft:#F9D7C3"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 3 · 听力</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>04</span> QUESTION TYPE</div>
+          <h1>Highlight Correct Summary</h1>
+          <h2>选择正确摘要</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>听完录音后，从若干段文字中选出最准确概括录音的一段。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>音频 30–90 秒，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>听力 + 阅读</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>正误计分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>主旨</span><span>信息整合</span></div>
+          <p class="scoring-copy">选择最准确的摘要得分；选错或未作答不得分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>只有一个正确摘要</span></li><li><b>2</b><span>同时核对主旨和关键细节</span></li><li><b>3</b><span>警惕只复述局部信息的选项</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>04 / P3 · 听力</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-listening-multiple-choice-single-answer"
+      data-filename="p3-05-multiple-choice-single-answer.png"
+      style="--accent:#B85C31;--pale:#FFF0E5;--soft:#F9D7C3"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 3 · 听力</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>05</span> QUESTION TYPE</div>
+          <h1>Multiple Choice, Single Answer</h1>
+          <h2>听力单选题</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>听一段学术主题录音，并从多个选项中选出唯一正确答案。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>音频 30–90 秒，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>听力</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>正误计分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>唯一正确答案</span></div>
+          <p class="scoring-copy">选择正确答案得分；选错或未作答不得分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>只有一个正确选项</span></li><li><b>2</b><span>播放前先看题目和选项</span></li><li><b>3</b><span>按题目要求捕捉主旨、细节或推断</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>05 / P3 · 听力</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-select-missing-word"
+      data-filename="p3-06-select-missing-word.png"
+      style="--accent:#B85C31;--pale:#FFF0E5;--soft:#F9D7C3"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 3 · 听力</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>06</span> QUESTION TYPE</div>
+          <h1>Select Missing Word</h1>
+          <h2>选择缺失词</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>录音结尾的词或词组会被提示音替代，根据上下文选择最合适的补全项。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>音频 20–70 秒，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>听力</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>正误计分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>语境预测</span><span>唯一正确答案</span></div>
+          <p class="scoring-copy">选择能正确补全录音的选项得分；选错或未作答不得分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>缺失位置在录音结尾</span></li><li><b>2</b><span>通常有 3–5 个选项</span></li><li><b>3</b><span>利用上下文和语法预测结尾</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>06 / P3 · 听力</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-highlight-incorrect-words"
+      data-filename="p3-07-highlight-incorrect-words.png"
+      style="--accent:#B85C31;--pale:#FFF0E5;--soft:#F9D7C3"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 3 · 听力</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>07</span> QUESTION TYPE</div>
+          <h1>Highlight Incorrect Words</h1>
+          <h2>标出错误词</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>边听录音边看文字稿，点击文字稿中与实际录音不一致的词。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>音频 15–50 秒，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>听力 + 阅读</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>带扣分的部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>正确标记 +1</span><span>错误标记 −1</span></div>
+          <p class="scoring-copy">每个正确标记得一分，每个错误标记扣一分；存在误选时仍按部分得分计算。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>只点击与录音不同的词</span></li><li><b>2</b><span>播放前可快速浏览文字稿</span></li><li><b>3</b><span>没有把握时注意误选成本</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>07 / P3 · 听力</span>
+      </footer>
+    </article>
+
+    <article
+      class="question-card"
+      id="card-write-from-dictation"
+      data-filename="p3-08-write-from-dictation.png"
+      style="--accent:#B85C31;--pale:#FFF0E5;--soft:#F9D7C3"
+    >
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <header class="card-header">
+        <div class="brand">
+          <img src="../detail-pages/logo.png" alt="小圆PTE突击 round logo">
+          <div><strong>小圆PTE突击</strong><small>PTE Academic 题型速览</small></div>
+        </div>
+        <div class="part-pill">Part 3 · 听力</div>
+      </header>
+      <main class="card-content">
+        <section class="overview">
+          <div class="eyebrow"><span>08</span> QUESTION TYPE</div>
+          <h1>Write from Dictation</h1>
+          <h2>听写句子</h2>
+          <div class="task-block">
+            <h3>这题做什么</h3>
+            <p>听一个短句后，在输入框中按录音的原词和正确顺序完整写出句子。</p>
+          </div>
+          <div class="facts">
+            <div><small>题干 / 材料</small><strong>音频 3–5 秒，只播放一次</strong></div>
+            <div><small>作答时间</small><strong>未设单题时长</strong></div>
+            <div><small>计分技能</small><strong>听力 + 写作</strong></div>
+          </div>
+        </section>
+        <aside class="scoring">
+          <div class="scoring-topline"><span>SCORING</span><b>逐词部分得分</b></div>
+          <h3>怎么评分</h3>
+          <div class="trait-tags"><span>正确词语</span><span>正确拼写</span></div>
+          <p class="scoring-copy">内容分按写出的正确词语数量计算；所有词语和拼写都正确时获得本题最高分。</p>
+          <div class="rules-box">
+            <h4>作答关键</h4>
+            <ol><li><b>1</b><span>音频自动播放且只有一次</span></li><li><b>2</b><span>尽量保持原词序</span></li><li><b>3</b><span>提交前检查拼写和遗漏</span></li></ol>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>designed　小圆PTE突击，根据Pearson官网信息整理。</span>
+        <span>08 / P3 · 听力</span>
+      </footer>
+    </article>
+</body>
+</html>

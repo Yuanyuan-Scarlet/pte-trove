@@ -24,3 +24,25 @@ export function buildSlicePlan(
 ): MarketingImageSlice[];
 
 export function parseCliArgs(argv: string[]): MarketingImageOptions;
+
+export function resolveBrowserPath(explicitPath: string): string;
+
+export interface LaunchedBrowser {
+  browserProcess: import("node:child_process").ChildProcess;
+  browserWebSocketUrl: string;
+  port: number;
+  profileDirectory: string;
+}
+
+export interface CdpClient {
+  close(): void;
+  send(method: string, params?: Record<string, unknown>): Promise<unknown>;
+}
+
+export function launchBrowser(browserPath: string): Promise<LaunchedBrowser>;
+export function connectCdp(webSocketUrl: string): Promise<CdpClient>;
+export function createPage(port: number): Promise<{
+  webSocketDebuggerUrl: string;
+}>;
+export function waitForDocument(cdp: CdpClient, expectedUrl: string): Promise<void>;
+export function closeBrowser(browser: LaunchedBrowser): Promise<void>;
