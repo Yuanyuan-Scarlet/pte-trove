@@ -1,14 +1,89 @@
 #!/usr/bin/env bash
-# 阿里云轻量服务器发布脚本：本地打包，经 SWAS 云助手上传，在服务器构建并原子切换。
+# 阿里云轻量服务器发布脚本：仅发布已推送的 Git HEAD，优先使用 SCP，云助手作为回退通道。
 set -euo pipefail
 
 REGION="${REGION:-cn-shanghai}"
 INSTANCE_ID="${INSTANCE_ID:-c3c514211070460cb094dde74fbeadb9}"
 APP_ROOT="${APP_ROOT:-/opt/prep-trove}"
-CHUNK=7000
+SSH_TARGET="${SSH_TARGET:-root@47.116.99.82}"
+SSH_KEY="${SSH_KEY:-.secrets/aliyun/ptedi.pem}"
+DEPLOY_TRANSPORT="${DEPLOY_TRANSPORT:-auto}"
+CHUNK="${CHUNK:-7000}"
+MAX_SWAS_PACKAGE_BYTES="${MAX_SWAS_PACKAGE_BYTES:-2097152}"
+MAX_SCP_PACKAGE_BYTES="${MAX_SCP_PACKAGE_BYTES:-67108864}"
 RELEASE="$(date -u +%Y%m%dT%H%M%SZ)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
+
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "tracked working tree changes must be committed before deployment" >&2
+  exit 1
+fi
+
+HEAD_COMMIT="$(git rev-parse HEAD)"
+ORIGIN_MAIN="$(git rev-parse origin/main 2>/dev/null || true)"
+if [ -z "$ORIGIN_MAIN" ] || [ "$HEAD_COMMIT" != "$ORIGIN_MAIN" ]; then
+  echo "HEAD must match origin/main before deployment" >&2
+  exit 1
+fi
+
+case "$DEPLOY_TRANSPORT" in
+  auto)
+    if [ -f "$SSH_KEY" ] && command -v ssh >/dev/null && command -v scp >/dev/null; then
+      DEPLOY_TRANSPORT="scp"
+    else
+      DEPLOY_TRANSPORT="swas"
+    fi
+    ;;
+  scp|swas) ;;
+  *)
+    echo "unsupported DEPLOY_TRANSPORT: $DEPLOY_TRANSPORT" >&2
+    exit 1
+    ;;
+esac
+
+ARCHIVE="$TMP/app.tgz"
+ARCHIVE_PATHS=(
+  .
+  ':(exclude)marketing'
+  ':(exclude)public/fonts/noto-sans-sc-400.ttf'
+)
+if [ "$DEPLOY_TRANSPORT" = "swas" ]; then
+  ARCHIVE_PATHS+=(
+    ':(exclude)public/og.png'
+    ':(exclude)public/fonts/noto-sans-sc-400.woff2'
+  )
+fi
+
+git archive --format=tar.gz --output="$ARCHIVE" HEAD -- "${ARCHIVE_PATHS[@]}"
+
+UNSAFE_ENTRIES="$({ tar tzf "$ARCHIVE" || true; } | grep -E '(^|/)(\.git|\.secrets|node_modules|\.data|tmp|output|outputs|work|materials|history|old-sold)(/|$)|\.(pem|key|pdf|zip)$' || true)"
+if [ -n "$UNSAFE_ENTRIES" ]; then
+  printf 'release archive contains forbidden entries:\n%s\n' "$UNSAFE_ENTRIES" >&2
+  exit 1
+fi
+
+PACKAGE_BYTES="$(stat -c%s "$ARCHIVE")"
+if [ "$DEPLOY_TRANSPORT" = "swas" ] && [ "$PACKAGE_BYTES" -gt "$MAX_SWAS_PACKAGE_BYTES" ]; then
+  echo "SWAS archive is too large: ${PACKAGE_BYTES}B > ${MAX_SWAS_PACKAGE_BYTES}B; use SCP" >&2
+  exit 1
+fi
+if [ "$DEPLOY_TRANSPORT" = "scp" ] && [ "$PACKAGE_BYTES" -gt "$MAX_SCP_PACKAGE_BYTES" ]; then
+  echo "SCP archive is unexpectedly large: ${PACKAGE_BYTES}B > ${MAX_SCP_PACKAGE_BYTES}B" >&2
+  exit 1
+fi
+
+printf 'release=%s commit=%s transport=%s package=%sB\n' "$RELEASE" "$HEAD_COMMIT" "$DEPLOY_TRANSPORT" "$PACKAGE_BYTES"
+
+deploy_with_scp() {
+  local remote_archive="/tmp/pte-app-$RELEASE.tgz"
+  local remote_script="/tmp/pte-remote-release-$RELEASE.sh"
+  local ssh_options=(-i "$SSH_KEY" -o StrictHostKeyChecking=accept-new)
+
+  scp "${ssh_options[@]}" "$ARCHIVE" "$SSH_TARGET:$remote_archive"
+  ssh "${ssh_options[@]}" "$SSH_TARGET" \
+    "set -eu; tar xOf '$remote_archive' deploy/remote-release.sh > '$remote_script'; chmod 0700 '$remote_script'; trap 'rm -f \"$remote_script\" \"$remote_archive\"' EXIT; APP_ROOT='$APP_ROOT' ARCHIVE='$remote_archive' RELEASE='$RELEASE' bash '$remote_script'"
+}
 
 run_remote() {
   local name="$1" timeout="$2" content="$3" id="" status="" output="" attempt=""
@@ -43,39 +118,33 @@ run_remote() {
   return 1
 }
 
-tar czf "$TMP/app.tgz" \
-  --exclude='./.git' \
-  --exclude='./node_modules' \
-  --exclude='./.next' \
-  --exclude='./.data' \
-  --exclude='./.npm-cache' \
-  --exclude='./.openai' \
-  --exclude='./.tmp' \
-  --exclude='./.wrangler' \
-  --exclude='./dist' \
-  --exclude='./.env' \
-  --exclude='./.dev.vars' \
-  --exclude='./public/og.png' \
-  --exclude='./public/fonts/noto-sans-sc-400.woff2' \
-  --exclude='./public/fonts/noto-sans-sc-400.ttf' \
-  .
+deploy_with_swas() {
+  local md5 remote_archive remote_script file content
+  md5="$(md5sum "$ARCHIVE" | awk '{print $1}')"
+  remote_archive="/tmp/pte-app-$RELEASE.tgz"
+  remote_script="/tmp/pte-remote-release-$RELEASE.sh"
 
-MD5="$(md5sum "$TMP/app.tgz" | awk '{print $1}')"
-base64 -w0 "$TMP/app.tgz" > "$TMP/app.b64"
-split -b "$CHUNK" "$TMP/app.b64" "$TMP/chunk_"
-printf 'release=%s package=%sB md5=%s chunks=%s\n' "$RELEASE" "$(stat -c%s "$TMP/app.tgz")" "$MD5" "$(find "$TMP" -maxdepth 1 -name 'chunk_*' | wc -l)"
+  base64 -w0 "$ARCHIVE" > "$TMP/app.b64"
+  split -b "$CHUNK" "$TMP/app.b64" "$TMP/chunk_"
+  printf 'md5=%s chunks=%s\n' "$md5" "$(find "$TMP" -maxdepth 1 -name 'chunk_*' | wc -l)"
 
-run_remote "pte-prep-$RELEASE" 120 "rm -f /tmp/pte-deploychunk_* /tmp/pte-app.b64 /tmp/pte-app.tgz && echo PREP_OK"
-for file in "$TMP"/chunk_*; do
-  content="$(cat "$file")"
-  run_remote "pte-up-$(basename "$file")" 120 "printf '%s' '$content' > /tmp/pte-deploychunk_$(basename "$file")"
-  sleep 2
-done
+  run_remote "pte-prep-$RELEASE" 120 \
+    "rm -f /tmp/pte-deploychunk_* /tmp/pte-app.b64 /tmp/pte-app.tgz '$remote_archive' '$remote_script'; echo PREP_OK"
+  for file in "$TMP"/chunk_*; do
+    content="$(cat "$file")"
+    run_remote "pte-up-$(basename "$file")" 120 \
+      "printf '%s' '$content' > /tmp/pte-deploychunk_$(basename "$file")"
+  done
 
-run_remote "pte-unpack-$RELEASE" 240 "set -eu; cd /tmp; cat /tmp/pte-deploychunk_* > pte-app.b64; base64 -d pte-app.b64 > pte-app.tgz; echo '$MD5  /tmp/pte-app.tgz' | md5sum -c -; release='$APP_ROOT/releases/$RELEASE'; mkdir -p \"\$release/public/fonts\"; tar xzf /tmp/pte-app.tgz -C \"\$release\"; curl -fsSL --retry 5 --retry-delay 2 https://raw.githubusercontent.com/Yuanyuan-Scarlet/pte-trove/main/public/og.png -o \"\$release/public/og.png\"; curl -fsSL --retry 5 --retry-delay 2 https://raw.githubusercontent.com/Yuanyuan-Scarlet/pte-trove/main/public/fonts/noto-sans-sc-400.woff2 -o \"\$release/public/fonts/noto-sans-sc-400.woff2\"; echo '8d8637f8ea56d53a8cc54843ca6f73b7809d7670306361d1f7e15084f9b70b47  '\"\$release/public/og.png\" | sha256sum -c -; echo 'eb385eca10dd39caff881c38338aefccecefaec6b42cc016fbe81434e388d6c3a  '\"\$release/public/fonts/noto-sans-sc-400.woff2\" | sha256sum -c -; rm -f /tmp/pte-app.b64 /tmp/pte-app.tgz /tmp/pte-deploychunk_*; cd \"\$release\"; bash deploy/server-install.sh; woff2_decompress public/fonts/noto-sans-sc-400.woff2; test -s public/fonts/noto-sans-sc-400.ttf; chown -R prep-trove:prep-trove \"\$release\"; echo UNPACK_OK"
+  run_remote "pte-release-$RELEASE" 1200 \
+    "set -eu; cat /tmp/pte-deploychunk_* > /tmp/pte-app.b64; base64 -d /tmp/pte-app.b64 > '$remote_archive'; echo '$md5  $remote_archive' | md5sum -c -; tar xOf '$remote_archive' deploy/remote-release.sh > '$remote_script'; chmod 0700 '$remote_script'; trap 'rm -f /tmp/pte-deploychunk_* /tmp/pte-app.b64 \"$remote_script\" \"$remote_archive\"' EXIT; APP_ROOT='$APP_ROOT' ARCHIVE='$remote_archive' RELEASE='$RELEASE' bash '$remote_script'"
+}
 
-run_remote "pte-build-$RELEASE" 900 "set -eu; release='$APP_ROOT/releases/$RELEASE'; cd \"\$release\"; runuser -u prep-trove -- npm ci; runuser -u prep-trove -- npm run build; test -f /etc/prep-trove.env; echo BUILD_OK"
+if [ "$DEPLOY_TRANSPORT" = "scp" ]; then
+  deploy_with_scp
+else
+  deploy_with_swas
+fi
 
-run_remote "pte-switch-$RELEASE" 180 "set -eu; release='$APP_ROOT/releases/$RELEASE'; previous=\$(readlink -f '$APP_ROOT/current' || true); ln -sfn \"\$release\" '$APP_ROOT/current'; systemctl restart prep-trove.service; if ! curl --fail --silent --show-error --retry 10 --retry-delay 2 http://127.0.0.1:3100/api/health >/dev/null; then if [ -n \"\$previous\" ] && [ -d \"\$previous\" ]; then ln -sfn \"\$previous\" '$APP_ROOT/current'; systemctl restart prep-trove.service; fi; exit 1; fi; systemctl start prep-trove-archive.service; systemctl start prep-trove-backup.service; echo DEPLOY_OK"
-
-printf 'DONE release=%s health=http://127.0.0.1:3100/api/health\n' "$RELEASE"
+printf 'DONE release=%s commit=%s transport=%s health=http://127.0.0.1:3100/api/health\n' \
+  "$RELEASE" "$HEAD_COMMIT" "$DEPLOY_TRANSPORT"

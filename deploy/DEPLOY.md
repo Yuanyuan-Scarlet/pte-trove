@@ -64,11 +64,15 @@ chmod 0640 /etc/prep-trove.env
 bash deploy/deploy.sh
 ```
 
-脚本会排除 Git 元数据、依赖、缓存、开发密钥和业务数据，经阿里云云助手分块上传源码。体积较大的公开 OG 图片和中文 WOFF2 字体由服务器从 GitHub 当前 `main` 下载并校验固定 SHA-256；服务器使用 `woff2_decompress` 生成水印所需的 PDF 兼容 TTF，避免把约 2.5 MB 的派生字体放入上传包。随后服务器运行 `npm ci`、`npm run build`，构建步骤会将完整公开资源和前端静态资源装入 standalone 目录。systemd 直接运行 standalone server，通过健康检查后原子切换 `current`；健康检查失败时自动恢复上一个版本。
+脚本只发布已经提交且已推送到 `origin/main` 的 Git `HEAD`。存在未提交的已跟踪文件，或本地 `HEAD` 与 `origin/main` 不一致时，脚本会在打包前停止。发布包由 `git archive` 生成，并显式拒绝密钥、缓存、PDF、ZIP、业务资料和历史目录，避免本地工作目录中的忽略文件进入服务器。
+
+默认 `DEPLOY_TRANSPORT=auto`：项目内 `.secrets/aliyun/ptedi.pem` 可用且本机安装了 `ssh`、`scp` 时，脚本优先通过 SCP 一次上传完整压缩包；否则回退到阿里云云助手分块通道。需要显式选择时，可在 Git Bash 中运行 `DEPLOY_TRANSPORT=scp bash deploy/deploy.sh` 或 `DEPLOY_TRANSPORT=swas bash deploy/deploy.sh`。云助手发布包默认不得超过 2 MiB，超过时脚本会在上传前停止并提示使用 SCP，避免异常包产生数小时的无效分块上传。
+
+SCP 与云助手通道都会从发布包中提取并执行同一份 `deploy/remote-release.sh`。服务器统一校验或下载固定 SHA-256 的公开 OG 图片和中文 WOFF2 字体，使用 `woff2_decompress` 生成水印所需的 PDF 兼容 TTF，然后运行 `npm ci` 和 `npm run build`。systemd 通过健康检查后原子切换 `current`；健康检查失败时自动恢复上一个版本。发布成功后自动清理旧 release，只保留最近 6 个合法时间戳目录，并始终保护 `current`。
 
 服务器安装步骤会统一把 `deploy/*.sh` 恢复为 `0755`，用于兼容 Windows 打包时丢失 Unix 可执行位的情况。部署完成后必须确认备份服务实际运行成功，不能只依赖应用健康检查。
 
-服务器 SSH 密钥可用时，优先将排除密钥、缓存、依赖和业务数据的发布包 SCP 到 `/tmp/prep-trove-app.tgz`，再以 root 执行 `deploy/remote-release.sh`。该方式一次传输完整包，服务器侧仍执行相同的构建、健康检查和原子回滚流程。云助手分块脚本作为无 SSH 时的回退通道。
+如果 SCP 连接临时不可用，可以显式设置 `DEPLOY_TRANSPORT=swas` 使用云助手回退通道。不要手工打包整个工作目录；统一通过 `deploy/deploy.sh` 创建受控发布包并调用远端发布流程。
 
 ## nginx 与证书
 

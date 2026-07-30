@@ -36,18 +36,53 @@ test("switches releases atomically and rejects current as a rollback target", as
   assert.match(source, /"\$APP_ROOT\/releases\/"\*/);
   assert.match(source, /--retry-connrefused/);
   assert.match(source, /systemctl start prep-trove-archive\.timer prep-trove-backup\.timer/);
+  assert.match(source, /cleanup_old_releases/);
+  assert.match(source, /"\$count" -le 6/);
+  assert.match(source, /"\$target" = "\$current"/);
+  assert.match(source, /"\$target" != "\$APP_ROOT\/releases\/\$name"/);
   assert.doesNotMatch(source, /ln -sfn/);
 });
 
+test("packages only the pushed Git revision and prefers SCP", async () => {
+  const source = await readFile("deploy/deploy.sh", "utf8");
+  assert.match(source, /git diff --quiet/);
+  assert.match(source, /git rev-parse origin\/main/);
+  assert.match(source, /git archive --format=tar\.gz/);
+  assert.match(source, /':\(exclude\)marketing'/);
+  assert.match(source, /DEPLOY_TRANSPORT="\$\{DEPLOY_TRANSPORT:-auto\}"/);
+  assert.match(source, /DEPLOY_TRANSPORT="scp"/);
+  assert.match(source, /MAX_SWAS_PACKAGE_BYTES/);
+  assert.match(source, /release archive contains forbidden entries/);
+  assert.match(source, /tar xOf '\$remote_archive' deploy\/remote-release\.sh/);
+  assert.doesNotMatch(source, /tar czf "\$TMP\/app\.tgz"/);
+});
+
+test("uses the same remote release implementation for SCP and SWAS", async () => {
+  const source = await readFile("deploy/deploy.sh", "utf8");
+  const references = source.match(/deploy\/remote-release\.sh/g) ?? [];
+  assert.equal(references.length, 2);
+  assert.doesNotMatch(source, /ln -sfn/);
+  assert.doesNotMatch(source, /systemctl restart prep-trove\.service/);
+});
+
 test("builds the PDF-safe watermark font from the pinned WOFF2 asset", async () => {
-  const [installSource, deploySource] = await Promise.all([
+  const [installSource, deploySource, releaseSource] = await Promise.all([
     readFile("deploy/server-install.sh", "utf8"),
     readFile("deploy/deploy.sh", "utf8"),
+    readFile("deploy/remote-release.sh", "utf8"),
   ]);
   assert.match(installSource, /sqlite3 woff2/);
-  assert.match(deploySource, /--exclude='\.\/public\/fonts\/noto-sans-sc-400\.ttf'/);
-  assert.match(deploySource, /woff2_decompress public\/fonts\/noto-sans-sc-400\.woff2/);
-  assert.match(deploySource, /test -s public\/fonts\/noto-sans-sc-400\.ttf/);
+  assert.match(deploySource, /':\(exclude\)public\/fonts\/noto-sans-sc-400\.ttf'/);
+  assert.match(releaseSource, /WOFF2_SHA256=/);
+  assert.match(releaseSource, /woff2_decompress public\/fonts\/noto-sans-sc-400\.woff2/);
+  assert.match(releaseSource, /test -s public\/fonts\/noto-sans-sc-400\.ttf/);
+});
+
+test("deployment shell scripts pass Bash syntax validation", () => {
+  for (const script of ["deploy/deploy.sh", "deploy/remote-release.sh"]) {
+    const result = spawnSync("bash", ["-n", script], { encoding: "utf8" });
+    assert.equal(result.status, 0, `${script}: ${result.stderr}`);
+  }
 });
 
 test("restores executable permissions after a Windows-created release archive is unpacked", async () => {
