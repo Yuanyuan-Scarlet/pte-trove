@@ -184,7 +184,9 @@
 
 ## 5. 标准验证命令
 
-```powershell
+以下命令在 Windows PowerShell、Linux Bash 和 macOS zsh/Bash 中写法相同，均从仓库根目录执行：
+
+```shell
 npm test
 npm run lint
 npx tsc --noEmit
@@ -193,7 +195,7 @@ npm run build
 
 API 级端到端测试需先启动隔离本地服务，再执行：
 
-```powershell
+```shell
 node tests/e2e.integration.mjs
 ```
 

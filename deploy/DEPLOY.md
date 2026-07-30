@@ -2,6 +2,12 @@
 
 > 本文档由 AI 辅助整理，并由项目负责人审核。
 
+## 命令与路径约定
+
+- 本机命令默认从仓库根目录执行。Windows 使用 PowerShell 或文中明确指定的 Git Bash；Linux/macOS 使用 Bash 或兼容的 POSIX shell。
+- 本机路径语法不同时，文档分别给出 Windows PowerShell 与 Linux/macOS 版本。
+- `/etc`、`/var`、`/opt`、`/root`、`/tmp` 下的路径以及 `systemctl`、`journalctl`、`chown`、`chmod`、`certbot` 命令都属于远端 Debian 服务器。无论运维人员的本机是 Windows、Linux 还是 macOS，这些远端命令和路径都保持不变。
+
 ## 目标架构
 
 | 项目 | 配置 |
@@ -43,7 +49,7 @@ SMS_TEMPLATE_VARIABLE=code
 SMS_REGION_ID=cn-hangzhou
 ```
 
-使用云助手将该文件写入 `/etc/prep-trove.env`，随后执行：
+使用云助手将该文件写入 `/etc/prep-trove.env`，随后在远端 Debian 服务器执行：
 
 ```bash
 chown root:prep-trove /etc/prep-trove.env
@@ -52,7 +58,7 @@ chmod 0640 /etc/prep-trove.env
 
 ## 发布应用
 
-在 Git Bash 中从仓库根目录执行：
+在仓库根目录执行。Windows 使用 Git Bash，Linux/macOS 使用 Bash；三个平台的命令相同：
 
 ```bash
 bash deploy/deploy.sh
@@ -66,7 +72,7 @@ bash deploy/deploy.sh
 
 ## nginx 与证书
 
-首次签证书前先安装 `deploy/nginx/bzzl.ysspark.cn.http.conf`，执行 `nginx -t` 后 reload。随后运行：
+首次签证书前先安装 `deploy/nginx/bzzl.ysspark.cn.http.conf`，执行 `nginx -t` 后 reload。随后在远端 Debian 服务器运行：
 
 ```bash
 certbot certonly --webroot -w /var/www/bzzl.ysspark.cn -d bzzl.ysspark.cn --non-interactive --agree-tos -m service@ysspark.cn
@@ -75,6 +81,8 @@ certbot certonly --webroot -w /var/www/bzzl.ysspark.cn -d bzzl.ysspark.cn --non-
 证书签发成功后将 `deploy/nginx/bzzl.ysspark.cn.conf` 安装到 `/etc/nginx/conf.d/bzzl.ysspark.cn.conf`，再次执行 `nginx -t` 和 reload。
 
 ## 日常运维
+
+以下命令通过 SSH 登录后在远端 Debian 服务器执行：
 
 ```bash
 systemctl status prep-trove.service
@@ -89,10 +97,18 @@ curl --fail http://127.0.0.1:3100/api/health
 
 生产管理入口、账号和密码均由首次安装随机生成。固定 `/admin` 按设计返回 404，不用于生产登录。
 
-在项目根目录使用 PowerShell 执行：
+在项目根目录执行以下对应命令。
+
+Windows PowerShell：
 
 ```powershell
 ssh -i ".\.secrets\aliyun\ptedi.pem" root@47.116.99.82 "cat /root/prep-trove-admin-credentials.txt"
+```
+
+Linux/macOS：
+
+```bash
+ssh -i "./.secrets/aliyun/ptedi.pem" root@47.116.99.82 "cat /root/prep-trove-admin-credentials.txt"
 ```
 
 root-only 凭据文件返回以下三项：
@@ -118,14 +134,14 @@ ADMIN_PASSWORD=...
 1. 不得删除、覆盖或用仓库中的 `.env.example` 替换 `/etc/prep-trove.env`。
 2. 不得删除或单独修改 `ADMIN_ROUTE`、`ADMIN_USERNAME`、`ADMIN_PASSWORD_HASH`。三项需要人工轮换时必须作为同一次受控变更处理，并同步更新密码管理器。
 3. `ADMIN_ROUTE` 必须保持 `manage-` 加 48 位小写十六进制字符；`ADMIN_USERNAME` 不得改回 `admin`。安装脚本发现管理路径缺失/格式无效，或用户名为 `admin` 时，会将三项重新初始化。
-4. 正常发布前后都要核对管理配置指纹。指纹一致表示三项没有发生变化；命令只输出摘要，不显示实际凭据：
+4. 正常发布前后都要核对管理配置指纹。指纹一致表示三项没有发生变化；以下命令在远端 Debian 服务器执行，只输出摘要，不显示实际凭据：
 
    ```bash
    grep -E '^(ADMIN_ROUTE|ADMIN_USERNAME|ADMIN_PASSWORD_HASH)=' /etc/prep-trove.env | sort | sha256sum
    ```
 
 5. 首次确认凭据可登录后，将实际 URL、用户名和密码保存到可信密码管理器。删除 `/root/prep-trove-admin-credentials.txt` 不会改变运行中的凭据；删除前必须确认密码管理器中的记录可以恢复。
-6. 修改 `/etc/prep-trove.env` 前先创建 root-only 备份，并确认备份权限：
+6. 修改 `/etc/prep-trove.env` 前先在远端 Debian 服务器创建 root-only 备份，并确认备份权限：
 
    ```bash
    backup="/root/prep-trove.env.$(date -u +%Y%m%dT%H%M%SZ).backup"
@@ -139,4 +155,4 @@ ADMIN_PASSWORD=...
 
 ## 回滚
 
-列出 `/opt/prep-trove/releases`，将 `/opt/prep-trove/current` 指向上一个完整版本，再重启服务。数据目录独立于代码版本，回滚代码不会覆盖 SQLite 和资料文件。涉及数据库结构变更时必须先阅读对应迁移说明。
+在远端 Debian 服务器列出 `/opt/prep-trove/releases`，将 `/opt/prep-trove/current` 指向上一个完整版本，再重启服务。数据目录独立于代码版本，回滚代码不会覆盖 SQLite 和资料文件。涉及数据库结构变更时必须先阅读对应迁移说明。

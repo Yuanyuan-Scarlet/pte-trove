@@ -12,6 +12,13 @@
 
 本文档是小圆 PTE 突击宝藏资料自动交付系统的产品与工程需求基线。文档记录当前已确认的业务规则、页面流程、数据约束、文件生命周期、安全边界、后台范围和验收标准。
 
+### 1.1 命令与路径文档规范
+
+- 所有本地开发、测试和运维文档中的平台相关命令，都必须同时提供 Windows PowerShell 与 Linux/macOS shell 版本。
+- 在所有平台上语法完全相同的 npm、Node.js 等命令可以只展示一次，但必须明确标注为跨平台命令。
+- 平台相关的本机路径必须同时给出 Windows 的 `\` 分隔形式与 Linux/macOS 的 `/` 分隔形式，或使用经验证可在三类平台中工作的仓库相对路径。
+- `/etc`、`/var`、`/opt` 等生产绝对路径和 systemd 相关命令属于远端 Debian 部署目标；文档必须明确执行环境，无需转换为本机 Windows 路径。
+
 ## 2. 项目目标
 
 建设一套面向小红书资料买家的自动交付系统。管理员上传无水印的 PTE 复习资料并发布后，系统为每个商品入口生成独立链接；买家通过中国大陆手机号、短信验证码和小红书订单号完成验证，系统为其生成逐页带手机号水印的专属 PDF 或合集 ZIP，并在有效期内支持重复下载同一份文件。
@@ -425,11 +432,12 @@ UNIQUE(material_version_id, product_entry, order_number)
 
 ## 11. 水印规则
 
-水印功能参考：
+水印功能参考以下相邻项目文件（从本仓库根目录定位）：
 
-```text
-D:\Work\ysspark\proj\AIPTE\knowledge\auto\add_waterprint.py
-```
+| 平台 | 路径 |
+| --- | --- |
+| Windows PowerShell | `..\AIPTE\knowledge\auto\add_waterprint.py` |
+| Linux/macOS | `../AIPTE/knowledge/auto/add_waterprint.py` |
 
 每一页必须包含以下两段水印：
 
@@ -911,7 +919,7 @@ UNIQUE(material_version_id, product_entry, order_number)
 
 - 使用现有阿里云轻量应用服务器和域名，不使用 Serverless 计算平台。
 - 买家端和管理后台部署在 `bzzl.ysspark.cn` 下。
-- 部署配置可以参考：`D:\Work\ysspark\proj\official-website`。
+- 部署配置可以参考相邻项目：Windows PowerShell 路径 `..\official-website`；Linux/macOS 路径 `../official-website`。
 - 应用使用标准 Next.js Node.js 服务，由 systemd 管理，并通过 nginx 反向代理。
 - 应用仅监听服务器回环地址，不直接向公网开放 Node.js 端口。
 - 数据库使用服务器本地 SQLite，启用 WAL、事务、唯一约束和 `busy_timeout`。
@@ -927,12 +935,12 @@ UNIQUE(material_version_id, product_entry, order_number)
 ### 21.2 阿里云短信
 
 - 使用阿里云短信发送验证码。
-- 参考已实测可接收验证码的项目：`D:\Work\ysspark\proj\AIPTE\apps\DI`。
+- 参考已实测可接收验证码的相邻项目：Windows PowerShell 路径 `..\AIPTE\apps\DI`；Linux/macOS 路径 `../AIPTE/apps/DI`。
 - AccessKey、短信签名和模板 ID 必须通过环境变量或服务器密钥管理配置。
 
 ### 21.3 水印脚本
 
-- 参考：`D:\Work\ysspark\proj\AIPTE\knowledge\auto\add_waterprint.py`。
+- 参考：Windows PowerShell 路径 `..\AIPTE\knowledge\auto\add_waterprint.py`；Linux/macOS 路径 `../AIPTE/knowledge/auto/add_waterprint.py`。
 - 复用水印算法前需要移除邮件、固定目录、CSV 和平台特定字体依赖。
 
 ## 22. 日志与可观测性

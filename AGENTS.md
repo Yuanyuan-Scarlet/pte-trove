@@ -10,13 +10,15 @@ Routes live in `app/`, reusable client UI in `components/`, business services in
 
 Use Node 22.13 or Node 24+; `.nvmrc` selects Node 26.3.0.
 
-```powershell
+The following commands use the same syntax in Windows PowerShell, Linux Bash, and macOS zsh/Bash. Run them from the repository root.
+
+```shell
 npm install          # install locked dependencies
-npm run dev          # start local D1/R2 development
+npm run dev          # start local Node.js and SQLite development
 npm test             # run domain, schema, PDF, and ZIP tests
 npm run lint         # enforce React and TypeScript style
 npx tsc --noEmit     # type-check without writing output
-npm run build        # create the production Worker build
+npm run build        # create the production standalone build
 ```
 
 ## Coding Style & Naming Conventions

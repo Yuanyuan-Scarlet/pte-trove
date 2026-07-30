@@ -8,6 +8,13 @@
 
 产品与工程规则以 [`SPEC.md`](SPEC.md) 为准；本文用于快速理解、开发、测试和部署项目。
 
+## 命令与路径约定
+
+- 除非另有说明，命令都从仓库根目录执行。
+- 标记为 `shell` 的命令在 Windows PowerShell、Linux Bash 和 macOS zsh/Bash 中写法相同。
+- 平台语法不同时，文档分别给出“Windows PowerShell”和“Linux/macOS”版本。
+- 文档中的仓库相对路径统一使用 `/`；Windows PowerShell 也支持这种写法。生产部署章节中的 `/etc`、`/var`、`/opt` 等绝对路径属于远端 Debian 服务器，不是本机路径。
+
 ## 核心业务流程
 
 ```text
@@ -90,9 +97,24 @@
 - 推荐使用 `.nvmrc` 指定的 Node.js 26.3.0。
 - npm 使用仓库内的 `package-lock.json`。
 
-```powershell
+以下安装命令跨平台通用：
+
+```shell
 npm install
+```
+
+复制本地环境文件：
+
+Windows PowerShell：
+
+```powershell
 Copy-Item .env.example .env.local
+```
+
+Linux/macOS：
+
+```bash
+cp .env.example .env.local
 ```
 
 ### 2. 配置开发环境
@@ -107,7 +129,7 @@ Copy-Item .env.example .env.local
 
 生成管理员密码摘要：
 
-```powershell
+```shell
 npm run admin:hash
 ```
 
@@ -115,7 +137,7 @@ npm run admin:hash
 
 ### 3. 启动应用
 
-```powershell
+```shell
 npm run dev
 ```
 
@@ -182,7 +204,7 @@ mock 短信验证码只允许在非生产环境返回给开发页面；`ENVIRONM
 
 提交前至少执行：
 
-```powershell
+```shell
 npm test
 npm run lint
 npx tsc --noEmit
@@ -203,6 +225,8 @@ npm run build
 
 API 级端到端测试需要先启动一套隔离的本地服务，并准备有效的 `.tmp/e2e-source.pdf`。测试进程需要使用与本地服务一致的 `ADMIN_ROUTE`、`ADMIN_USERNAME` 和明文测试密码：
 
+Windows PowerShell：
+
 ```powershell
 $env:E2E_BASE_URL = "http://localhost:3000"
 $env:ADMIN_ROUTE = "admin"
@@ -211,11 +235,21 @@ $env:ADMIN_PASSWORD = "仅用于本地隔离测试的密码"
 node tests/e2e.integration.mjs
 ```
 
+Linux/macOS：
+
+```bash
+export E2E_BASE_URL="http://localhost:3000"
+export ADMIN_ROUTE="admin"
+export ADMIN_USERNAME="local-admin"
+export ADMIN_PASSWORD="仅用于本地隔离测试的密码"
+node tests/e2e.integration.mjs
+```
+
 不要让端到端测试连接生产数据库、真实客户资料或生产短信配置。Chrome DevTools MCP 的网页验收步骤、真实资料基准和自动化映射见 [`tests/ACCEPTANCE.md`](tests/ACCEPTANCE.md)。
 
 ## 生产部署
 
-生产环境采用以下边界：
+生产环境采用以下边界。下面的绝对路径均属于远端 Debian 服务器，与执行部署操作的本机系统无关：
 
 - nginx 对外提供 80/443，HTTP 跳转 HTTPS。
 - 应用只监听 `127.0.0.1:3100`，不直接暴露 Node.js 端口。
