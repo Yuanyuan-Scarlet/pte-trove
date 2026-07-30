@@ -6,7 +6,6 @@ import {
   Clock3,
   Download,
   FileArchive,
-  Gift,
   LoaderCircle,
   LockKeyhole,
   PackageCheck,
@@ -15,7 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import Image from "next/image";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import {
   CELEBRATION_FADE_DRIFT_X_VW,
   CELEBRATION_FADE_DRIFT_Y_VH,
@@ -39,15 +38,6 @@ interface PortalStatus {
   ready: boolean;
   filename: string | null;
   generatedAt: number | null;
-}
-
-function remainingText(target: number): string {
-  const difference = Math.max(0, target - Date.now());
-  const days = Math.floor(difference / 86_400_000);
-  const hours = Math.floor((difference % 86_400_000) / 3_600_000);
-  if (days > 0) return `${days}天${hours}小时`;
-  const minutes = Math.max(1, Math.ceil(difference / 60_000));
-  return `${minutes}分钟`;
 }
 
 function CelebrationAtmosphere({ phase }: { phase: "generating" | "ready" }) {
@@ -146,13 +136,6 @@ export function BuyerPortal({ token }: { token: string }) {
     return () => window.clearInterval(timer);
   }, [loadStatus, status?.jobStatus]);
 
-  const phaseNote = useMemo(() => {
-    if (!status) return "";
-    if (status.phase === "GENERATION_OPEN") return `专属文件生成通道剩余 ${remainingText(status.generationDeadline)}`;
-    if (status.phase === "DOWNLOAD_ONLY") return `文件下载有效期剩余 ${remainingText(status.expiresAt)}`;
-    return "本期资料领取通道已结束";
-  }, [status]);
-
   async function sendCode() {
     setError("");
     setNotice("");
@@ -246,18 +229,21 @@ export function BuyerPortal({ token }: { token: string }) {
 
       <section className="portal-layout">
         <div className="portal-hero">
-          <span className="eyebrow"><Sparkles size={15} /> PURCHASE UNLOCKED</span>
-          <h1>恭喜你<br />解锁 <em>{status.entryMeta.label}</em> 宝藏资料</h1>
-          <p className="hero-copy">{status.entryMeta.description}。完成身份验证，就能领取你的专属资料啦。</p>
-          <div className="treasure-ticket">
-            <div className="ticket-icon"><Gift /></div>
-            <div><span>本期资料</span><strong>{status.versionName}</strong></div>
-            <div className="ticket-time"><Clock3 size={17} /><span>{phaseNote}</span></div>
-          </div>
+          <h1>
+            <span className="hero-congratulations hero-congratulations-watercolor">
+              <Image
+                src="/design-preview/congratulations-watercolor.png"
+                alt="Congratulations!"
+                width={860}
+                height={255}
+                priority
+              />
+            </span>
+          </h1>
           <div className="promise-row">
-            <span><CheckCircle2 /> </span>
-            <span><CheckCircle2 /> 原文件支持重复下载</span>
-            <span><CheckCircle2 /> 登录状态自动保存</span>
+            <span><CheckCircle2 /> 14天内随时下载</span>
+            <span><CheckCircle2 /> 登陆状态自动保存</span>
+            <span><CheckCircle2 /> 考试好运UPUP</span>
           </div>
         </div>
 
@@ -265,9 +251,9 @@ export function BuyerPortal({ token }: { token: string }) {
           {ready ? (
             <div className="ready-state">
               <div className="success-mark"><PackageCheck /></div>
-              <span className="step-kicker">专属资料已经准备就绪</span>
-              <h2>备考宝藏已为你备好</h2>
-              <p>{status.phone ? `已验证手机 ${status.phone}` : "身份验证已完成"}，记得保存好你的专属文件哦！</p>
+              <span className="step-kicker">ready</span>
+              <h2>专属资料已就绪</h2>
+              <p>请在有效期内及时下载，祝考试好运！</p>
               <div className="file-tile">
                 <FileArchive />
                 <div><strong>{status.filename}</strong><span>生成于 {status.generatedAt ? new Date(status.generatedAt).toLocaleString("zh-CN") : "刚刚"}</span></div>
@@ -276,7 +262,6 @@ export function BuyerPortal({ token }: { token: string }) {
               <a className="primary-button download-button" href={`/api/public/${token}/download`}>
                 <Download /> 下载我的专属资料
               </a>
-              <p className="fine-print"><LockKeyhole /> 请及时保存文件哦</p>
             </div>
           ) : isGenerating ? (
             <div className="generating-state">
@@ -289,9 +274,10 @@ export function BuyerPortal({ token }: { token: string }) {
             </div>
           ) : (
             <form onSubmit={submit}>
-              <span className="step-kicker">领取只差一步</span>
-              <h2>{status.phase === "DOWNLOAD_ONLY" ? "登录并下载之前的文件" : "生成我的专属文件"}</h2>
-              <p className="form-intro">验证购买信息后，系统将为你生成专属宝藏资料。</p>
+              <h2 className="claim-title">
+                {status.phase === "DOWNLOAD_ONLY" ? "登录并下载之前的文件" : <>解锁 <em>{status.entryMeta.label}</em> 宝藏资料</>}
+              </h2>
+              <p className="form-intro">完成身份验证，领取你的专属资料</p>
 
               <label className="field-label" htmlFor="phone">中国大陆手机号</label>
               <div className="input-shell">
@@ -313,7 +299,7 @@ export function BuyerPortal({ token }: { token: string }) {
                 <PackageCheck size={19} />
                 <input id="order" autoCapitalize="characters" autoComplete="off" maxLength={19} value={orderNumber} onChange={(event) => setOrderNumber(event.target.value.trim().toUpperCase())} placeholder="P开头19位订单号" />
               </div>
-              <p className="field-help">从小红书订单详情复制，首次提交后手机号将会和该订单绑定。</p>
+              <p className="field-help">从小红书订单详情复制。</p>
 
               {notice && <div className="form-notice success-notice">{notice}</div>}
               {error && <div className="form-notice error-notice" role="alert">{error}</div>}
@@ -321,7 +307,7 @@ export function BuyerPortal({ token }: { token: string }) {
               <button className="primary-button" type="submit">
                 {status.phase === "DOWNLOAD_ONLY" ? "登录并查看文件" : "生成我的专属文件"}<ArrowRight />
               </button>
-              <p className="privacy-note"><LockKeyhole /> 为创建与保护专属资料，系统将保存手机号与订单信息；加油好好复习，祝考试顺利哦！</p>
+              <p className="privacy-note"><LockKeyhole /> 生成后记得及时保存哦！加油好好复习，祝考试顺利！</p>
             </form>
           )}
         </section>
