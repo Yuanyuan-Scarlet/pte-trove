@@ -6,7 +6,7 @@ APP_ROOT="${APP_ROOT:-/opt/prep-trove}"
 ARCHIVE="${ARCHIVE:-/tmp/prep-trove-app.tgz}"
 RELEASE="${RELEASE:-$(date -u +%Y%m%dT%H%M%SZ)}"
 OG_SHA256="8d8637f8ea56d53a8cc54843ca6f73b7809d7670306361d1f7e15084f9b70b47"
-WOFF2_SHA256="eb385eca10dd39caff881c38338aefccecefaec6b42cc016fbe81434e388d6c3a"
+WOFF2_SHA256="eb385eca10dd39caff881c38338aefccecfaec6b42cc016fbe81434e388d6c3a"
 
 if [ "$APP_ROOT" != "/opt/prep-trove" ]; then
   echo "unexpected APP_ROOT: $APP_ROOT" >&2
@@ -34,6 +34,7 @@ if printf '%s\n' "$ARCHIVE_ENTRIES" | grep -E '(^/|(^|/)\.\.(/|$))' >/dev/null; 
 fi
 
 release_dir="$APP_ROOT/releases/$RELEASE"
+deployment_succeeded=false
 previous="$(readlink -f "$APP_ROOT/current" || true)"
 if [[ "$previous" != "$APP_ROOT/releases/"* ]] || [ ! -d "$previous" ]; then
   previous=""
@@ -43,10 +44,18 @@ if [ -e "$release_dir" ]; then
   exit 1
 fi
 
-cleanup_archive() {
+cleanup_release_attempt() {
+  local current
   rm -f -- "$ARCHIVE"
+  if [ "$deployment_succeeded" = true ] || [ ! -d "$release_dir" ]; then
+    return
+  fi
+  current="$(readlink -f "$APP_ROOT/current" || true)"
+  if [ "$release_dir" != "$current" ]; then
+    rm -rf -- "$release_dir"
+  fi
 }
-trap cleanup_archive EXIT
+trap cleanup_release_attempt EXIT
 
 switch_current() {
   local target="$1"
@@ -131,4 +140,5 @@ systemctl start prep-trove-archive.timer prep-trove-backup.timer
 systemctl start prep-trove-archive.service
 systemctl start prep-trove-backup.service
 cleanup_old_releases
+deployment_succeeded=true
 printf 'DEPLOY_OK release=%s\n' "$RELEASE"

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
@@ -66,16 +67,34 @@ test("uses the same remote release implementation for SCP and SWAS", async () =>
 });
 
 test("builds the PDF-safe watermark font from the pinned WOFF2 asset", async () => {
-  const [installSource, deploySource, releaseSource] = await Promise.all([
+  const [installSource, deploySource, releaseSource, woff2, og] = await Promise.all([
     readFile("deploy/server-install.sh", "utf8"),
     readFile("deploy/deploy.sh", "utf8"),
     readFile("deploy/remote-release.sh", "utf8"),
+    readFile("public/fonts/noto-sans-sc-400.woff2"),
+    readFile("public/og.png"),
   ]);
   assert.match(installSource, /sqlite3 woff2/);
   assert.match(deploySource, /':\(exclude\)public\/fonts\/noto-sans-sc-400\.ttf'/);
   assert.match(releaseSource, /WOFF2_SHA256=/);
   assert.match(releaseSource, /woff2_decompress public\/fonts\/noto-sans-sc-400\.woff2/);
   assert.match(releaseSource, /test -s public\/fonts\/noto-sans-sc-400\.ttf/);
+
+  const configuredWoff2Hash = releaseSource.match(/WOFF2_SHA256="([a-f0-9]+)"/)?.[1];
+  const configuredOgHash = releaseSource.match(/OG_SHA256="([a-f0-9]+)"/)?.[1];
+  assert.equal(configuredWoff2Hash?.length, 64);
+  assert.equal(configuredOgHash?.length, 64);
+  assert.equal(configuredWoff2Hash, createHash("sha256").update(woff2).digest("hex"));
+  assert.equal(configuredOgHash, createHash("sha256").update(og).digest("hex"));
+});
+
+test("removes an incomplete release after a failed deployment", async () => {
+  const source = await readFile("deploy/remote-release.sh", "utf8");
+  assert.match(source, /deployment_succeeded=false/);
+  assert.match(source, /trap cleanup_release_attempt EXIT/);
+  assert.match(source, /"\$release_dir" != "\$current"/);
+  assert.match(source, /rm -rf -- "\$release_dir"/);
+  assert.match(source, /deployment_succeeded=true/);
 });
 
 test("deployment shell scripts pass Bash syntax validation", () => {
