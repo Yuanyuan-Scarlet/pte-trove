@@ -54,3 +54,16 @@ test("restores executable permissions after a Windows-created release archive is
   const source = await readFile("deploy/server-install.sh", "utf8");
   assert.match(source, /chmod 0755 deploy\/\*\.sh/);
 });
+
+test("keeps project text and deployment scripts on Unix LF line endings", async () => {
+  const [attributes, ...scripts] = await Promise.all([
+    readFile(".gitattributes", "utf8"),
+    readFile("deploy/backup.sh", "utf8"),
+    readFile("deploy/deploy.sh", "utf8"),
+    readFile("deploy/remote-release.sh", "utf8"),
+    readFile("deploy/server-install.sh", "utf8"),
+  ]);
+
+  assert.match(attributes, /^\* text=auto eol=lf$/m);
+  for (const source of scripts) assert.doesNotMatch(source, /\r/);
+});

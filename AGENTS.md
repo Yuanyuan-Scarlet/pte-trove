@@ -25,6 +25,10 @@ npm run build        # create the production standalone build
 
 Use two-space indentation in TypeScript, ESLint for static checks, and descriptive English identifiers such as `materialVersion` and `generationDeadline`. Keep product-entry constants uppercase (`WFD`, `DI`, `SST`, `RS`, `WE`, `BUNDLE`). Store timestamps in UTC and apply `Asia/Shanghai` only at business and presentation boundaries.
 
+## Line Endings
+
+All project text files must use Unix LF line endings. Keep `.gitattributes` configured to enforce LF across development environments and release archives; do not commit CRLF or mixed-line-ending text files.
+
 ## Testing Guidelines
 
 Every behavior change must include automated tests. Cover the 240-hour generation boundary, 720-hour expiry boundary, phone and order validation, both one-to-one uniqueness constraints, idempotent generation, session scope, ZIP contents, per-page watermarks, and archival behavior. Name tests after observable outcomes, for example `rejects_new_generation_after_240_hours`.
