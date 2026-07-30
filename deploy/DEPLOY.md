@@ -68,6 +68,12 @@ bash deploy/deploy.sh
 
 默认 `DEPLOY_TRANSPORT=auto`：项目内 `.secrets/aliyun/ptedi.pem` 可用且本机安装了 `ssh`、`scp` 时，脚本优先通过 SCP 一次上传完整压缩包；否则回退到阿里云云助手分块通道。需要显式选择时，可在 Git Bash 中运行 `DEPLOY_TRANSPORT=scp bash deploy/deploy.sh` 或 `DEPLOY_TRANSPORT=swas bash deploy/deploy.sh`。云助手发布包默认不得超过 2 MiB，超过时脚本会在上传前停止并提示使用 SCP，避免异常包产生数小时的无效分块上传。云助手分块默认使用 11,000 字节；加入 Shell 包装并经过 Base64 编码后仍低于 [`RunCommand` 官方规定的 16 KiB 上限](https://help.aliyun.com/zh/simple-application-server/developer-reference/api-swas-open-2020-06-01-runcommand/)。
 
+### 云助手 11 KB 分块实测结论
+
+2026-07-31（`Australia/Perth`）使用 `DEPLOY_TRANSPORT=swas` 完成真实生产发布验证。发布提交为 `0443820`，压缩包为 585,598 字节，Base64 后按每块 11,000 字节拆分为 71 个分块；全部分块均由 `RunCommand` 接受并执行成功，远端合并、MD5 校验、生产构建、原子切换和健康检查全部通过，总耗时约 623 秒。发布后确认 `current` 指向 `20260730T184101Z`，健康接口返回 `{"ok":true}`，临时上传文件数量为 0。
+
+结论：11,000 字节已经通过真实接口和完整发布流程验证，可以作为云助手回退通道的默认分块大小。该数值是原始数据块大小，不是阿里云硬限制；实际限制是命令内容和参数经过 Base64 编码后不超过 16 KiB。不要继续提高默认值，除非同时重新计算 Shell 包装后的编码长度、补充自动测试并完成一次真实云助手发布验证。即使使用 11,000 字节，云助手逐块创建命令和轮询仍明显慢于 SCP，因此正常发布继续优先使用 SCP。
+
 SCP 与云助手通道都会从发布包中提取并执行同一份 `deploy/remote-release.sh`。服务器统一校验或下载固定 SHA-256 的公开 OG 图片和中文 WOFF2 字体，使用 `woff2_decompress` 生成水印所需的 PDF 兼容 TTF，然后运行 `npm ci` 和 `npm run build`。systemd 通过健康检查后原子切换 `current`；健康检查失败时自动恢复上一个版本。发布成功后自动清理旧 release，只保留最近 6 个合法时间戳目录，并始终保护 `current`。
 
 服务器安装步骤会统一把 `deploy/*.sh` 恢复为 `0755`，用于兼容 Windows 打包时丢失 Unix 可执行位的情况。部署完成后必须确认备份服务实际运行成功，不能只依赖应用健康检查。
