@@ -85,6 +85,7 @@
 | `lib/` | 认证、短信、业务规则、SQLite、PDF、ZIP 和私有存储 |
 | `db/`、`drizzle/` | 数据库结构与迁移定义 |
 | `public/` | 可公开访问的品牌、字体和水印静态资产，不存业务 PDF |
+| `marketing/` | 商品主图、五个题型详情页、商家后台连续竖图及其生成说明 |
 | `scripts/` | standalone 资产准备、归档和运维工具 |
 | `deploy/` | 阿里云、nginx、systemd、备份和发布脚本 |
 | `tests/` | 单元、集成、安全、部署和端到端验收用例 |
@@ -190,6 +191,7 @@ mock 短信验证码只允许在非生产环境返回给开发页面；`ENVIRONM
 | `npm run dev` | 启动本地开发服务器 |
 | `npm test` | 运行领域、数据库、PDF、鉴权、安全和部署测试 |
 | `npm run lint` | 运行 ESLint |
+| `npm run marketing:images` | 将五个营销 HTML 页面生成商家后台使用的连续竖图 |
 | `npx tsc --noEmit` | TypeScript 类型检查，不写输出 |
 | `npm run build` | 创建 Next.js production standalone 构建 |
 | `npm run start` | 启动 `.next/standalone/server.js` |
@@ -286,6 +288,7 @@ node tests/e2e.integration.mjs
 ## 项目文档
 
 - [`SPEC.md`](SPEC.md)：权威产品与工程规格。
+- [`marketing/README.md`](marketing/README.md)：商品营销素材结构与连续竖图生成方法。
 - [`tests/ACCEPTANCE.md`](tests/ACCEPTANCE.md)：端到端 testcase、真实资料基准和生产验收记录。
 - [`deploy/DEPLOY.md`](deploy/DEPLOY.md)：阿里云部署、HTTPS、后台访问、固定凭据、备份和回滚。
 

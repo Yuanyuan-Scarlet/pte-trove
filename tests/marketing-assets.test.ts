@@ -29,9 +29,12 @@ test("marketing detail pages include mobile layout, delivery flow, and rights no
     assert.ok(html.includes("中国大陆手机号"));
     assert.ok(html.includes("P 开头加 18 位数字"));
     assert.ok(html.includes("生成后 14 天内"));
+    assert.ok(html.includes('class="hero-lead"'));
     assert.ok(html.includes("未经授权不得随意倒卖或分享"));
-    assert.ok(html.includes("2026 年 7 月 30 日"));
   }
+
+  const rsHtml = readFileSync(detailPath("rs.html"), "utf8");
+  assert.ok(rsHtml.includes("提示音后立即开口"));
 });
 
 test("all generated product images are square and large enough for ecommerce use", () => {
