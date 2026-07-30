@@ -35,6 +35,7 @@ export const ENTRY_META: Record<ProductEntry, { label: string; color: string; de
 
 export const BRAND_COLOR = "#EF4F5C";
 export const GENERATION_WINDOW_MS = 240 * 60 * 60 * 1000;
+export const RECOMMENDED_DOWNLOAD_WINDOW_MS = 336 * 60 * 60 * 1000;
 export const LINK_WINDOW_MS = 720 * 60 * 60 * 1000;
 export const FILE_RETENTION_MS = 720 * 60 * 60 * 1000;
 export const OTP_TTL_MS = 5 * 60 * 1000;

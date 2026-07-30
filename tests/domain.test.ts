@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { GENERATION_WINDOW_MS, LINK_WINDOW_MS } from "../lib/constants";
-import { calculateDeadlines, getLinkPhase, isValidOrderNumber, isValidPhone, normalizeOrderNumber, normalizePhone } from "../lib/domain";
+import { GENERATION_WINDOW_MS, LINK_WINDOW_MS, RECOMMENDED_DOWNLOAD_WINDOW_MS } from "../lib/constants";
+import { calculateDeadlines, formatLocalTime, getLinkPhase, isValidOrderNumber, isValidPhone, normalizeOrderNumber, normalizePhone, recommendedDownloadDeadline } from "../lib/domain";
 
 test("calculates independent 240-hour and 720-hour deadlines", () => {
   const publishedAt = Date.UTC(2026, 6, 29, 12, 0, 0);
@@ -18,6 +18,17 @@ test("switches phases exactly at each boundary", () => {
   assert.equal(getLinkPhase(publishedAt, generationDeadline, expiresAt, generationDeadline), "DOWNLOAD_ONLY");
   assert.equal(getLinkPhase(publishedAt, generationDeadline, expiresAt, expiresAt - 1), "DOWNLOAD_ONLY");
   assert.equal(getLinkPhase(publishedAt, generationDeadline, expiresAt, expiresAt), "EXPIRED");
+});
+
+test("shows a 14-day download reminder without extending the hard expiry", () => {
+  const generatedAt = Date.UTC(2026, 6, 30, 8, 30, 0);
+  const expiresAt = generatedAt + LINK_WINDOW_MS;
+  const deadline = recommendedDownloadDeadline(generatedAt, expiresAt);
+
+  assert.equal(deadline, generatedAt + RECOMMENDED_DOWNLOAD_WINDOW_MS);
+  assert.equal(formatLocalTime(deadline, "Australia/Perth"), "2026/08/13 16:30");
+  assert.equal(formatLocalTime(deadline, "America/New_York"), "2026/08/13 04:30");
+  assert.equal(recommendedDownloadDeadline(generatedAt, generatedAt + 1_000), generatedAt + 1_000);
 });
 
 test("validates mainland phone numbers and normalizes +86", () => {

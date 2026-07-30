@@ -22,6 +22,7 @@ import {
   getCelebrationPhase,
   getCelebrationRibbonVisualShape,
 } from "@/lib/celebration";
+import { formatLocalTime, recommendedDownloadDeadline } from "@/lib/domain";
 
 type Phase = "GENERATION_OPEN" | "DOWNLOAD_ONLY" | "EXPIRED";
 
@@ -207,6 +208,12 @@ export function BuyerPortal({ token }: { token: string }) {
   const accent = status.entryMeta.color;
   const isGenerating = status.jobStatus === "PROCESSING" || submitting;
   const ready = status.ready;
+  const downloadReminderDeadline = status.generatedAt === null
+    ? null
+    : recommendedDownloadDeadline(status.generatedAt, status.expiresAt);
+  const localDownloadReminder = downloadReminderDeadline === null
+    ? null
+    : formatLocalTime(downloadReminderDeadline);
   const celebrationPhase = getCelebrationPhase({
     jobStatus: status.jobStatus,
     progress,
@@ -242,7 +249,6 @@ export function BuyerPortal({ token }: { token: string }) {
           </h1>
           <div className="promise-row">
             <span><CheckCircle2 /> 14天内随时下载</span>
-            <span><CheckCircle2 /> 登陆状态自动保存</span>
             <span><CheckCircle2 /> 考试好运UPUP</span>
           </div>
         </div>
@@ -253,7 +259,14 @@ export function BuyerPortal({ token }: { token: string }) {
               <div className="success-mark"><PackageCheck /></div>
               <span className="step-kicker">ready</span>
               <h2>专属资料已就绪</h2>
-              <p>请在有效期内及时下载，祝考试好运！</p>
+              <p className="download-reminder">
+                {localDownloadReminder === null ? "请及时下载并保存，祝考试好运！" : (
+                  <>
+                    <span>请在生成后<strong>14天</strong>内下载，祝考试好运！</span>
+                    <span>截止：<strong>{localDownloadReminder}</strong>（本地时间）</span>
+                  </>
+                )}
+              </p>
               <div className="file-tile">
                 <FileArchive />
                 <div><strong>{status.filename}</strong><span>生成于 {status.generatedAt ? new Date(status.generatedAt).toLocaleString("zh-CN") : "刚刚"}</span></div>

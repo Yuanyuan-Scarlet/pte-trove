@@ -4,6 +4,7 @@ import {
   ORDER_PATTERN,
   PHONE_PATTERN,
   PRODUCT_ENTRIES,
+  RECOMMENDED_DOWNLOAD_WINDOW_MS,
   type ProductEntry,
 } from "./constants";
 
@@ -27,6 +28,10 @@ export function calculateDeadlines(publishedAt: number) {
     generationDeadline: publishedAt + GENERATION_WINDOW_MS,
     expiresAt: publishedAt + LINK_WINDOW_MS,
   };
+}
+
+export function recommendedDownloadDeadline(generatedAt: number, expiresAt: number): number {
+  return Math.min(generatedAt + RECOMMENDED_DOWNLOAD_WINDOW_MS, expiresAt);
 }
 
 export function normalizePhone(value: unknown): string {
@@ -62,6 +67,18 @@ export function formatShanghaiTime(timestamp: number | null): string {
   if (!timestamp) return "—";
   return new Intl.DateTimeFormat("zh-CN", {
     timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(timestamp);
+}
+
+export function formatLocalTime(timestamp: number, timeZone?: string): string {
+  return new Intl.DateTimeFormat("zh-CN", {
+    ...(timeZone ? { timeZone } : {}),
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
