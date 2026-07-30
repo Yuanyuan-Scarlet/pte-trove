@@ -3,7 +3,12 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { unzipSync } from "fflate";
 import { PDFDict, PDFDocument, PDFName, PDFRawStream, StandardFonts } from "pdf-lib";
-import { addPhoneWatermarkWithAssets, buildBundle } from "../lib/pdf";
+import {
+  WATERMARK_OPACITY,
+  addPhoneWatermarkWithAssets,
+  buildBundle,
+  watermarkTextFields,
+} from "../lib/pdf";
 
 async function samplePdf(): Promise<ArrayBuffer> {
   const document = await PDFDocument.create();
@@ -42,6 +47,14 @@ test("adds text and logo watermark resources to every PDF page without changing 
     });
   assert.ok(objectSubtypes.includes("/Form"), "the PDF must contain the shared watermark page");
   assert.ok(objectSubtypes.includes("/Image"), "the PDF must contain the logo image");
+});
+
+test("uses the delivery watermark opacity and leading text spacing", () => {
+  assert.equal(WATERMARK_OPACITY, 0.015);
+  assert.deepEqual(watermarkTextFields("13800000000"), [
+    "  祝考试好运 UPUP",
+    "    13800000000",
+  ]);
 });
 
 test("builds a five-file bundle with fixed public filenames", async () => {

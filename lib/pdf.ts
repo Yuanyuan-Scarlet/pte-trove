@@ -12,10 +12,13 @@ let logoBytesPromise: Promise<ArrayBuffer> | null = null;
 const WATERMARK_PAGE_WIDTH = 612;
 const WATERMARK_PAGE_HEIGHT = 792;
 const WATERMARK_FONT_SIZE = 72;
-const WATERMARK_TEXT_OPACITY = 0.06;
-const WATERMARK_LOGO_OPACITY = 0.02;
+export const WATERMARK_OPACITY = 0.015;
 const WATERMARK_ROTATION = 45;
 const WATERMARK_TEXT_OFFSET = 100;
+
+export function watermarkTextFields(phone: string): [string, string] {
+  return [`  祝考试好运 UPUP`, `    ${phone}`];
+}
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
   return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
@@ -71,6 +74,7 @@ async function createWatermarkPage(phone: string, fontBytes: ArrayBuffer, logoBy
     y: 0,
     width: logo.width / 12,
     height: logo.height / 12,
+    opacity: WATERMARK_OPACITY,
   });
 
   const radians = WATERMARK_ROTATION * Math.PI / 180;
@@ -81,19 +85,20 @@ async function createWatermarkPage(phone: string, fontBytes: ArrayBuffer, logoBy
       size: WATERMARK_FONT_SIZE,
       font,
       color: rgb(0, 0, 0),
-      opacity: WATERMARK_TEXT_OPACITY,
+      opacity: WATERMARK_OPACITY,
       rotate: degrees(WATERMARK_ROTATION),
     });
   };
-  drawWatermarkText("祝考试好运 UPUP", 150, 200);
-  drawWatermarkText(phone, 200, 90);
+  const [greeting, phoneText] = watermarkTextFields(phone);
+  drawWatermarkText(greeting, 150, 200);
+  drawWatermarkText(phoneText, 200, 90);
 
   page.drawImage(logo, {
     x: (WATERMARK_PAGE_WIDTH - logo.width) / 2,
     y: (WATERMARK_PAGE_HEIGHT - logo.height) / 2,
     width: logo.width,
     height: logo.height,
-    opacity: WATERMARK_LOGO_OPACITY,
+    opacity: WATERMARK_OPACITY,
   });
 
   return watermarkDocument.save({ useObjectStreams: true });

@@ -16,6 +16,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  CELEBRATION_FADE_DRIFT_X_VW,
+  CELEBRATION_FADE_DRIFT_Y_VH,
+  CELEBRATION_RIBBONS,
+  getCelebrationPhase,
+  getCelebrationRibbonVisualShape,
+} from "@/lib/celebration";
 
 type Phase = "GENERATION_OPEN" | "DOWNLOAD_ONLY" | "EXPIRED";
 
@@ -41,6 +48,42 @@ function remainingText(target: number): string {
   if (days > 0) return `${days}天${hours}小时`;
   const minutes = Math.max(1, Math.ceil(difference / 60_000));
   return `${minutes}分钟`;
+}
+
+function CelebrationAtmosphere({ phase }: { phase: "generating" | "ready" }) {
+  return (
+    <div className={`celebration-layer celebration-${phase}`} aria-hidden="true">
+      <div className="celebration-ribbons">
+        {CELEBRATION_RIBBONS.map((ribbon, index) => {
+          const horizontalDirection = ribbon.peakX === 0
+            ? (index % 2 === 0 ? -1 : 1)
+            : Math.sign(ribbon.peakX);
+          return (
+            <span
+              className="celebration-ribbon-flight"
+              key={`${ribbon.shape}-${ribbon.originX}-${index}`}
+              style={{
+                "--ribbon-origin-x": `${ribbon.originX}%`,
+                "--ribbon-origin-y": `${ribbon.originY}%`,
+                "--ribbon-peak-x": `${ribbon.peakX}vw`,
+                "--ribbon-peak-y": `${ribbon.peakY}vh`,
+                "--ribbon-fade-x": `${ribbon.peakX + horizontalDirection * CELEBRATION_FADE_DRIFT_X_VW}vw`,
+                "--ribbon-fade-y": `${ribbon.peakY + CELEBRATION_FADE_DRIFT_Y_VH}vh`,
+                "--ribbon-width": `${ribbon.width}px`,
+                "--ribbon-length": `${ribbon.length}px`,
+                "--ribbon-delay": `${ribbon.delay}s`,
+                "--ribbon-duration": `${ribbon.duration}s`,
+                "--ribbon-rotation": `${ribbon.rotation}deg`,
+                "--ribbon-color": ribbon.color,
+              } as React.CSSProperties}
+            >
+              <span className={`celebration-ribbon celebration-ribbon-${getCelebrationRibbonVisualShape(ribbon.shape)}`} />
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export function BuyerPortal({ token }: { token: string }) {
@@ -151,7 +194,9 @@ export function BuyerPortal({ token }: { token: string }) {
       if (!response.ok) throw new Error(data.error ?? "专属文件生成失败");
       setProgress(100);
       const next = await loadStatus();
-      if (data.state === "GENERATING" || !next.ready) setNotice("正在打包资料，页面会自动刷新，请稍等");
+      if (data.state === "GENERATING" || !next.ready) {
+        setNotice("正在打包资料，页面会自动刷新，请稍等");
+      }
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "专属文件生成失败");
     } finally {
@@ -179,9 +224,16 @@ export function BuyerPortal({ token }: { token: string }) {
   const accent = status.entryMeta.color;
   const isGenerating = status.jobStatus === "PROCESSING" || submitting;
   const ready = status.ready;
+  const celebrationPhase = getCelebrationPhase({
+    jobStatus: status.jobStatus,
+    progress,
+    ready,
+    submitting,
+  });
 
   return (
     <main className="portal-page" style={{ "--accent": accent } as React.CSSProperties}>
+      {celebrationPhase !== "none" && <CelebrationAtmosphere phase={celebrationPhase} />}
       {toast && <div className="portal-toast" role="status" aria-live="polite"><ShieldCheck />{toast}</div>}
       <div className="confetti confetti-one" />
       <div className="confetti confetti-two" />

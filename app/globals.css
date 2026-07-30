@@ -29,7 +29,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 /* Buyer portal */
 .portal-page { --accent: var(--brand); position: relative; min-height: 100vh; overflow: hidden; background: radial-gradient(circle at 8% 8%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 28%), radial-gradient(circle at 92% 75%, #ffe9d7 0, transparent 24%), #fffaf6; }
 .portal-page::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .45; background-image: radial-gradient(#b6a7a0 0.75px, transparent 0.75px); background-size: 20px 20px; mask-image: linear-gradient(to bottom, black, transparent 72%); }
-.portal-nav { position: relative; z-index: 2; width: min(1180px, calc(100% - 40px)); height: 92px; margin: auto; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid color-mix(in srgb, var(--accent) 14%, var(--line)); }
+.portal-nav { position: relative; z-index: 3; width: min(1180px, calc(100% - 40px)); height: 92px; margin: auto; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid color-mix(in srgb, var(--accent) 14%, var(--line)); }
 .portal-nav img { width: 48px; height: 48px; object-fit: cover; border-radius: 15px; box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 22%, transparent); }
 .portal-nav > div:nth-child(2) { display: flex; flex-direction: column; }
 .portal-nav strong { font-size: 16px; letter-spacing: .01em; }
@@ -37,7 +37,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .secure-chip { margin-left: auto; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid color-mix(in srgb, var(--accent) 22%, white); border-radius: 999px; color: color-mix(in srgb, var(--accent) 76%, #18373b); background: color-mix(in srgb, var(--accent) 7%, white); font-size: 12px; font-weight: 700; }
 .portal-toast { position: fixed; z-index: 50; top: 18px; left: 50%; display: flex; align-items: center; gap: 9px; width: max-content; max-width: calc(100vw - 32px); padding: 13px 18px; border: 1px solid #f0d5a6; border-radius: 14px; color: #704713; background: #fff9eb; box-shadow: 0 16px 45px rgb(57 39 18 / 18%); font-size: 14px; font-weight: 750; transform: translateX(-50%); }
 .portal-toast svg { width: 18px; height: 18px; flex: 0 0 auto; }
-.portal-layout { position: relative; z-index: 1; width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 58px 0 64px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(390px, .74fr); gap: clamp(48px, 7vw, 104px); align-items: center; }
+.portal-layout { position: relative; z-index: 3; width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 58px 0 64px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(390px, .74fr); gap: clamp(48px, 7vw, 104px); align-items: center; }
 .portal-hero { padding: 10px 0; }
 .eyebrow { display: inline-flex; align-items: center; gap: 7px; color: var(--accent, var(--brand)); font-size: 12px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
 .portal-hero h1 { max-width: 710px; margin: 20px 0 22px; font-size: clamp(48px, 5.8vw, 78px); line-height: 1.07; letter-spacing: -.055em; }
@@ -55,7 +55,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .promise-row span { display: inline-flex; align-items: center; gap: 6px; }
 .promise-row svg { width: 16px; color: var(--accent); }
 .claim-card { position: relative; min-height: 590px; padding: clamp(28px, 3.5vw, 44px); background: rgba(255,255,255,.92); border: 1px solid color-mix(in srgb, var(--accent) 18%, white); border-radius: 32px; box-shadow: 0 30px 90px rgb(65 38 34 / 12%), 0 4px 16px color-mix(in srgb, var(--accent) 7%, transparent); backdrop-filter: blur(16px); }
-.claim-card::before { content: ""; position: absolute; top: 18px; right: 22px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: -20px 16px 0 color-mix(in srgb, var(--accent) 40%, white), 12px 28px 0 color-mix(in srgb, var(--accent) 20%, white); }
+.claim-card::before { content: ""; position: absolute; z-index: 2; top: 18px; right: 22px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: -20px 16px 0 color-mix(in srgb, var(--accent) 40%, white), 12px 28px 0 color-mix(in srgb, var(--accent) 20%, white); }
 .step-kicker { color: var(--accent); font-size: 12px; font-weight: 900; letter-spacing: .1em; }
 .claim-card h2 { margin: 9px 0 8px; font-size: 29px; letter-spacing: -.04em; }
 .form-intro, .ready-state > p, .generating-state > p { margin: 0 0 28px; color: var(--muted); font-size: 14px; line-height: 1.7; }
@@ -95,7 +95,18 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .progress-track span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width .45s ease; }
 .progress-steps { margin-top: 10px; display: flex; justify-content: space-between; color: #b0a5a7; font-size: 10px; font-weight: 800; }
 .progress-steps .active { color: var(--accent); }
-.portal-page footer { position: relative; z-index: 1; padding: 0 20px 34px; color: #9d9295; font-size: 11px; text-align: center; }
+.celebration-layer { position: fixed; z-index: 120; inset: 0; overflow: hidden; pointer-events: none; }
+.celebration-layer::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 10% 18%, #ff72b626 0, transparent 22%), radial-gradient(circle at 32% 7%, #ffd02824 0, transparent 20%), radial-gradient(circle at 54% 15%, #20d4c420 0, transparent 22%), radial-gradient(circle at 76% 8%, #4f7cff22 0, transparent 20%), radial-gradient(circle at 94% 20%, #c957e824 0, transparent 22%); opacity: .9; animation: celebration-glow 4.8s ease-in-out infinite; }
+.celebration-ribbon-flight { position: absolute; left: var(--ribbon-origin-x); top: var(--ribbon-origin-y); width: var(--ribbon-width); height: var(--ribbon-length); opacity: 0; color: var(--ribbon-color); filter: drop-shadow(0 4px 5px rgb(45 35 28 / 20%)); animation: celebration-ribbon-spray var(--ribbon-duration) cubic-bezier(.1,.74,.16,1) var(--ribbon-delay) infinite; will-change: transform, opacity; }
+.celebration-ribbon { display: block; width: calc(var(--ribbon-width) * 1.5); height: 100%; background: currentColor; box-shadow: inset -3px 0 rgb(255 255 255 / 24%); transform-origin: 50% 20%; }
+.celebration-ribbon-straight { border-radius: 2px; }
+.celebration-ribbon-curve { width: calc(var(--ribbon-length) * .56); height: 72%; background: transparent; border-top: var(--ribbon-width) solid currentColor; border-left: var(--ribbon-width) solid currentColor; border-radius: 62% 22% 16% 68%; box-shadow: none; }
+.celebration-generating .celebration-ribbon-flight:nth-child(3n + 1) { animation-delay: calc(var(--ribbon-delay) - 3.1s); }
+.celebration-generating .celebration-ribbon-flight:nth-child(3n + 2) { animation-delay: calc(var(--ribbon-delay) - 2.1s); }
+.celebration-generating .celebration-ribbon-flight:nth-child(3n) { animation-delay: calc(var(--ribbon-delay) - 1.1s); }
+@keyframes celebration-glow { 50% { opacity: .52; transform: scale(1.06); } }
+@keyframes celebration-ribbon-spray { 0%, 3% { opacity: 0; transform: translate(0, 5vh) rotate(0) scale(.5); } 8% { opacity: 1; } 45% { opacity: 1; transform: translate(var(--ribbon-peak-x), var(--ribbon-peak-y)) rotate(var(--ribbon-rotation)) scale(1); } 67% { opacity: 1; transform: translate(var(--ribbon-peak-x), var(--ribbon-peak-y)) rotate(var(--ribbon-rotation)) scale(1); animation-timing-function: linear; } 100% { opacity: 0; transform: translate(var(--ribbon-fade-x), var(--ribbon-fade-y)) rotate(var(--ribbon-rotation)) scale(1); } }
+.portal-page footer { position: relative; z-index: 3; padding: 0 20px 34px; color: #9d9295; font-size: 11px; text-align: center; }
 .confetti { position: absolute; z-index: 0; width: 10px; height: 26px; border-radius: 5px; background: var(--accent); transform: rotate(24deg); opacity: .35; }
 .confetti-one { top: 18%; left: 3%; }
 .confetti-two { top: 14%; right: 7%; width: 18px; height: 18px; border-radius: 50%; background: #ffb64d; }
@@ -211,6 +222,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
   .promise-row { gap: 10px 14px; }
   .claim-card { min-height: 0; padding: 28px 20px; border-radius: 24px; }
   .claim-card h2 { font-size: 25px; }
+  .celebration-ribbon-flight:nth-child(4n) { display: none; }
   .expired-card { padding: 36px 24px; }
   .admin-header { padding: 0 15px; }
   .admin-grid { display: block; }
@@ -229,4 +241,5 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .celebration-layer { display: none; }
 }
