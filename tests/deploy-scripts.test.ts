@@ -66,6 +66,17 @@ test("uses the same remote release implementation for SCP and SWAS", async () =>
   assert.doesNotMatch(source, /systemctl restart prep-trove\.service/);
 });
 
+test("keeps the 11 KB SWAS chunk command below the encoded 16 KiB limit", async () => {
+  const source = await readFile("deploy/deploy.sh", "utf8");
+  const chunkSize = Number(source.match(/CHUNK="\$\{CHUNK:-(\d+)\}"/)?.[1]);
+  assert.equal(chunkSize, 11_000);
+
+  const content = "A".repeat(chunkSize);
+  const command = `printf '%s' '${content}' > /tmp/pte-deploychunk_chunk_zz`;
+  const encodedBytes = Buffer.byteLength(Buffer.from(command).toString("base64"));
+  assert.ok(encodedBytes < 16 * 1024, `${encodedBytes} must be below 16384`);
+});
+
 test("builds the PDF-safe watermark font from the pinned WOFF2 asset", async () => {
   const [installSource, deploySource, releaseSource, woff2, og] = await Promise.all([
     readFile("deploy/server-install.sh", "utf8"),

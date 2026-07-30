@@ -66,7 +66,7 @@ bash deploy/deploy.sh
 
 脚本只发布已经提交且已推送到 `origin/main` 的 Git `HEAD`。存在未提交的已跟踪文件，或本地 `HEAD` 与 `origin/main` 不一致时，脚本会在打包前停止。发布包由 `git archive` 生成，并显式拒绝密钥、缓存、PDF、ZIP、业务资料和历史目录，避免本地工作目录中的忽略文件进入服务器。
 
-默认 `DEPLOY_TRANSPORT=auto`：项目内 `.secrets/aliyun/ptedi.pem` 可用且本机安装了 `ssh`、`scp` 时，脚本优先通过 SCP 一次上传完整压缩包；否则回退到阿里云云助手分块通道。需要显式选择时，可在 Git Bash 中运行 `DEPLOY_TRANSPORT=scp bash deploy/deploy.sh` 或 `DEPLOY_TRANSPORT=swas bash deploy/deploy.sh`。云助手发布包默认不得超过 2 MiB，超过时脚本会在上传前停止并提示使用 SCP，避免异常包产生数小时的无效分块上传。
+默认 `DEPLOY_TRANSPORT=auto`：项目内 `.secrets/aliyun/ptedi.pem` 可用且本机安装了 `ssh`、`scp` 时，脚本优先通过 SCP 一次上传完整压缩包；否则回退到阿里云云助手分块通道。需要显式选择时，可在 Git Bash 中运行 `DEPLOY_TRANSPORT=scp bash deploy/deploy.sh` 或 `DEPLOY_TRANSPORT=swas bash deploy/deploy.sh`。云助手发布包默认不得超过 2 MiB，超过时脚本会在上传前停止并提示使用 SCP，避免异常包产生数小时的无效分块上传。云助手分块默认使用 11,000 字节；加入 Shell 包装并经过 Base64 编码后仍低于 [`RunCommand` 官方规定的 16 KiB 上限](https://help.aliyun.com/zh/simple-application-server/developer-reference/api-swas-open-2020-06-01-runcommand/)。
 
 SCP 与云助手通道都会从发布包中提取并执行同一份 `deploy/remote-release.sh`。服务器统一校验或下载固定 SHA-256 的公开 OG 图片和中文 WOFF2 字体，使用 `woff2_decompress` 生成水印所需的 PDF 兼容 TTF，然后运行 `npm ci` 和 `npm run build`。systemd 通过健康检查后原子切换 `current`；健康检查失败时自动恢复上一个版本。发布成功后自动清理旧 release，只保留最近 6 个合法时间戳目录，并始终保护 `current`。
 
