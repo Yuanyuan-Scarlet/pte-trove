@@ -121,7 +121,7 @@ export function AdminDashboard({ routeKey }: { routeKey: string }) {
   if (!authenticated) return (
     <main className="admin-login-page">
       <form className="admin-login-card" onSubmit={login}>
-        <Image src="/brand/xiaoyuan-pte.png" alt="小圆 PTE 突击" width={58} height={58} priority />
+        <Image src="/brand/xiaoyuan-pte-round.png" alt="小圆 PTE 突击" width={58} height={58} priority />
         <span className="eyebrow"><ShieldCheck size={15} /> INTERNAL CONSOLE</span>
         <h1>资料发布后台</h1><p>管理员登录后上传资料并生成本期链接。</p>
         <label>管理员账号<input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" /></label>
@@ -135,7 +135,7 @@ export function AdminDashboard({ routeKey }: { routeKey: string }) {
   return (
     <main className="admin-page">
       <header className="admin-header">
-        <div className="admin-brand"><Image src="/brand/xiaoyuan-pte.png" alt="" width={44} height={44} /><div><strong>小圆 PTE 突击</strong><span>资料发布后台</span></div></div>
+        <div className="admin-brand"><Image src="/brand/xiaoyuan-pte-round.png" alt="" width={44} height={44} /><div><strong>小圆 PTE 突击</strong><span>资料发布后台</span></div></div>
         <button className="quiet-button" onClick={async () => { await fetch("/api/admin/logout", { method: "POST" }); setAuthenticated(false); }}><LogOut /> 退出</button>
       </header>
       <div className="admin-grid">

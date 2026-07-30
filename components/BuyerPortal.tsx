@@ -239,7 +239,7 @@ export function BuyerPortal({ token }: { token: string }) {
       <div className="confetti confetti-two" />
       <div className="confetti confetti-three" />
       <header className="portal-nav">
-        <Image src="/brand/xiaoyuan-pte.png" alt="小圆 PTE 突击" width={48} height={48} priority />
+        <Image src="/brand/xiaoyuan-pte-round.png" alt="小圆 PTE 突击" width={48} height={48} priority />
         <div><strong>小圆 PTE 突击</strong><span>专属资料领取站</span></div>
         <div className="secure-chip"><ShieldCheck size={16} /> 安全验证</div>
       </header>

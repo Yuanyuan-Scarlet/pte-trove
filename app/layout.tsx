@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase,
     title,
     description,
-    icons: { icon: "/brand/xiaoyuan-pte.png" },
+    icons: { icon: "/brand/xiaoyuan-pte-round.png" },
     openGraph: { title, description, images: [{ url: image, width: 1536, height: 1024 }], type: "website" },
     twitter: { card: "summary_large_image", title, description, images: [image] },
   };
