@@ -19,6 +19,20 @@ HTML 详情页是可编辑源文件，`detail-page-images/` 是生成结果。�
 
 PTE Academic 全题型资料以 `pte-academic-question-types/question-types.json` 为唯一数据源，修改后运行 `npm run marketing:pte-cards`，同步更新核对稿、预览页和 23 张 PNG。
 
+## 五项合集详情页
+
+五项合集源文件为 `detail-pages/bundle.html`，顶部沿用单项详情页结构，并使用 `product-images/bundle-main.png` 作为 1:1 商品主图。主图下方按以下顺序拼接五项单品内容：
+
+1. DI
+2. WFD
+3. WE
+4. SST
+5. RS
+
+每项内容保留对应单品主题色。合集页面末尾只保留一次统一的领取流程、合集购买引导和版权声明。
+
+合集中的五项正文来自对应单项 HTML，但当前为静态副本，不会自动同步。修改 `di.html`、`wfd.html`、`we.html`、`sst.html` 或 `rs.html` 的商品主图下方内容时，必须同步更新 `bundle.html` 中对应部分，再重新生成竖图。自动测试会检查五项正文完整性、排列顺序以及领取流程是否仅出现一次。
+
 ## 生成全部竖图
 
 从仓库根目录执行以下跨平台命令：
@@ -31,11 +45,15 @@ npm run marketing:images
 
 ```text
 wfd-01.png
-wfd-02.png
 ...
 di-01.png
 ...
-we-04.png
+sst-01.png
+...
+rs-01.png
+...
+we-01.png
+...
 bundle-01.png
 ...
 ```
@@ -45,7 +63,7 @@ bundle-01.png
 - 每张图片为 900 × 1600 像素 PNG。
 - 切片从页面顶部开始，前一张的结束位置等于后一张的开始位置，不遗漏、不重叠。
 - 最后一张使用页面底色补齐到统一高度。
-- 重新生成前只清理对应题型原有的编号 PNG，不删除目录中的其他文件。
+- 重新生成前只清理对应商品原有的编号 PNG，不删除目录中的其他文件。
 - 页面引用的任一图片加载失败时，生成立即报错，避免输出缺图版本。
 
 ## 自定义生成
@@ -53,31 +71,31 @@ bundle-01.png
 指定图片尺寸：
 
 ```shell
-npm run marketing:images -- --width 1080 --height 1920
+node scripts/generate-marketing-images.mjs --width 1080 --height 1920
 ```
 
-只生成部分题型：
+只生成部分商品，支持 `wfd`、`di`、`sst`、`rs`、`we` 和 `bundle`：
 
 ```shell
-npm run marketing:images -- --only wfd,di
+node scripts/generate-marketing-images.mjs --only wfd,di
 ```
 
 提高输出像素密度，同时保持页面排版宽度不变：
 
 ```shell
-npm run marketing:images -- --scale 2
+node scripts/generate-marketing-images.mjs --scale 2
 ```
 
 查看全部参数：
 
 ```shell
-npm run marketing:images -- --help
+node scripts/generate-marketing-images.mjs --help
 ```
 
 `--output` 必须指向 `marketing/` 内的目录，避免误清理项目外文件。例如：
 
 ```shell
-npm run marketing:images -- --output marketing/detail-page-images-review
+node scripts/generate-marketing-images.mjs --output marketing/detail-page-images-review
 ```
 
 ## 浏览器要求
@@ -89,13 +107,13 @@ npm run marketing:images -- --output marketing/detail-page-images-review
 Windows PowerShell：
 
 ```powershell
-npm run marketing:images -- --browser "D:\Apps\Chrome\chrome.exe"
+node scripts/generate-marketing-images.mjs --browser "D:\Apps\Chrome\chrome.exe"
 ```
 
 Linux/macOS：
 
 ```bash
-npm run marketing:images -- --browser "/opt/google/chrome/chrome"
+node scripts/generate-marketing-images.mjs --browser "/opt/google/chrome/chrome"
 ```
 
 也可以设置 `PTE_SCREENSHOT_BROWSER` 环境变量：
@@ -116,4 +134,4 @@ npm run marketing:images
 
 ## 商家后台上传
 
-同一商品按文件编号从小到大上传，例如 WFD 使用 `wfd-01.png`、`wfd-02.png`、`wfd-03.png`、`wfd-04.png`。五个题型与五项合集分别维护自己的图片序列，HTML 页面长度变化后，输出张数可能随之变化，应以最新一次生成结果为准。
+同一商品按文件编号从小到大上传，例如 WFD 使用 `wfd-01.png`、`wfd-02.png`、`wfd-03.png`，五项合集使用 `bundle-01.png`、`bundle-02.png`、`bundle-03.png`。五个题型与五项合集分别维护自己的图片序列，HTML 页面长度变化后，输出张数可能随之变化，应以最新一次生成结果为准。
