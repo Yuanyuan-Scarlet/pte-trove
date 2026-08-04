@@ -288,6 +288,7 @@ node tests/e2e.integration.mjs
 ## 项目文档
 
 - [`SPEC.md`](SPEC.md)：权威产品与工程规格。
+- [`docs/incidents/2026-08-04-xiaohongshu-webview-chrome92.md`](docs/incidents/2026-08-04-xiaohongshu-webview-chrome92.md)：小红书 Chrome 92 WebView 兼容故障的证据链、修复和复用排查手册。
 - [`marketing/README.md`](marketing/README.md)：商品营销素材结构与连续竖图生成方法。
 - [`tests/ACCEPTANCE.md`](tests/ACCEPTANCE.md)：端到端 testcase、真实资料基准和生产验收记录。
 - [`deploy/DEPLOY.md`](deploy/DEPLOY.md)：阿里云部署、HTTPS、后台访问、固定凭据、备份和回滚。
