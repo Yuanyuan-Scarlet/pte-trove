@@ -20,6 +20,9 @@ test("renders the revised buyer portal messaging and hierarchy", async () => {
   assert.ok(source.includes('"/design-preview/congratulations-watercolor.png"'));
   assert.ok(source.includes('<>解锁 <em>{status.entryMeta.label}</em> 宝藏资料</>'));
   assert.ok(source.includes("完成身份验证，领取你的专属资料"));
+  assert.ok(source.includes("setEmbeddedWebView(isEmbeddedWebView(window.navigator.userAgent))"));
+  assert.ok(source.includes('className="browser-recommendation" role="alert"'));
+  assert.ok(source.includes("建议使用 Edge、Safari 或 Chrome"));
   assert.ok(source.includes('className="step-kicker">ready'));
   assert.ok(source.includes("专属资料已就绪"));
   assert.ok(source.includes("formatLocalTime(downloadReminderDeadline)"));
@@ -41,7 +44,9 @@ test("renders the buyer portal logo as a circle and reduces the detail title", a
   assert.match(styles, /\.privacy-note svg \{[^}]*width: 14px;[^}]*height: 14px;[^}]*\}/);
   assert.match(styles, /\.download-button \{[^}]*margin-bottom: 10px;[^}]*\}/);
   assert.match(styles, /\.download-reminder > span \{[^}]*display: block;[^}]*white-space: nowrap;[^}]*\}/);
-  assert.match(styles, /\.download-reminder strong \{[^}]*color: var\(--accent\);[^}]*white-space: nowrap;[^}]*\}/);
+  assert.match(styles, /\.download-reminder strong \{[^}]*color: var\(--accent\);[^}]*background: #f6f0ee;[^}]*white-space: nowrap;[^}]*\}/);
+  assert.doesNotMatch(styles, /\.download-reminder strong \{[^}]*color-mix\(/);
+  assert.match(styles, /\.browser-recommendation \{[^}]*background: #fff8e8;[^}]*\}/);
 });
 
 test("keeps the buyer portal within ultra-narrow mobile viewports", async () => {

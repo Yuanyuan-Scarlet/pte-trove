@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock3,
   Download,
+  ExternalLink,
   FileArchive,
   LoaderCircle,
   LockKeyhole,
@@ -22,6 +23,7 @@ import {
   getCelebrationPhase,
   getCelebrationRibbonVisualShape,
 } from "@/lib/celebration";
+import { isEmbeddedWebView } from "@/lib/browser";
 import { formatLocalTime, recommendedDownloadDeadline } from "@/lib/domain";
 
 type Phase = "GENERATION_OPEN" | "DOWNLOAD_ONLY" | "EXPIRED";
@@ -90,6 +92,7 @@ export function BuyerPortal({ token }: { token: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [progress, setProgress] = useState(12);
+  const [embeddedWebView, setEmbeddedWebView] = useState(false);
 
   const loadStatus = useCallback(async () => {
     const response = await fetch(`/api/public/${token}/status`, { cache: "no-store" });
@@ -105,6 +108,13 @@ export function BuyerPortal({ token }: { token: string }) {
     }, 0);
     return () => window.clearTimeout(timer);
   }, [loadStatus]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setEmbeddedWebView(isEmbeddedWebView(window.navigator.userAgent));
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (window.location.hash !== "#auth-required") return;
@@ -233,6 +243,16 @@ export function BuyerPortal({ token }: { token: string }) {
         <div><strong>小圆 PTE 突击</strong><span>专属资料领取站</span></div>
         <div className="secure-chip"><ShieldCheck size={16} /> 安全验证</div>
       </header>
+
+      {embeddedWebView && (
+        <aside className="browser-recommendation" role="alert">
+          <ExternalLink aria-hidden="true" />
+          <div>
+            <strong>建议在浏览器中打开</strong>
+            <span>当前为应用内置浏览器，下载可能无法保存。请点击右上角菜单选择“在浏览器中打开”，建议使用 Edge、Safari 或 Chrome。</span>
+          </div>
+        </aside>
+      )}
 
       <section className="portal-layout">
         <div className="portal-hero">
