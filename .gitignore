@@ -8,7 +8,9 @@
 /dist/
 /.wrangler/
 /coverage/
+/output/
 /outputs/
+/tmp/
 /work/
 /.tmp/
 /.secrets/
