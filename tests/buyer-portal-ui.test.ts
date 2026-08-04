@@ -43,3 +43,13 @@ test("renders the buyer portal logo as a circle and reduces the detail title", a
   assert.match(styles, /\.download-reminder > span \{[^}]*display: block;[^}]*white-space: nowrap;[^}]*\}/);
   assert.match(styles, /\.download-reminder strong \{[^}]*color: var\(--accent\);[^}]*white-space: nowrap;[^}]*\}/);
 });
+
+test("keeps the buyer portal within ultra-narrow mobile viewports", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(styles, /\.portal-page \{[^}]*min-width: 259px;[^}]*overflow: hidden;[^}]*\}/);
+  assert.ok(styles.includes(".portal-layout > * { min-width: 0; }"));
+  assert.match(styles, /@media \(max-width: 360px\) \{[\s\S]*?\.claim-card \{ padding: 24px 14px; \}/);
+  assert.match(styles, /@media \(max-width: 360px\) \{[\s\S]*?\.input-shell \{ gap: 8px; padding-inline: 12px; \}/);
+  assert.match(styles, /@media \(max-width: 360px\) \{[\s\S]*?\.code-shell button \{ padding-left: 10px; \}/);
+});

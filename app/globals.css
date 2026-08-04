@@ -27,7 +27,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* Buyer portal */
-.portal-page { --accent: var(--brand); position: relative; min-height: 100vh; overflow: hidden; background: radial-gradient(circle at 8% 8%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 28%), radial-gradient(circle at 92% 75%, #ffe9d7 0, transparent 24%), #fffaf6; }
+.portal-page { --accent: var(--brand); position: relative; min-width: 259px; min-height: 100vh; overflow: hidden; background: radial-gradient(circle at 8% 8%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 28%), radial-gradient(circle at 92% 75%, #ffe9d7 0, transparent 24%), #fffaf6; }
 .portal-page::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .45; background-image: radial-gradient(#b6a7a0 0.75px, transparent 0.75px); background-size: 20px 20px; mask-image: linear-gradient(to bottom, black, transparent 72%); }
 .portal-nav { position: relative; z-index: 3; width: min(1180px, calc(100% - 40px)); height: 92px; margin: auto; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid color-mix(in srgb, var(--accent) 14%, var(--line)); }
 .portal-nav img { width: 48px; height: 48px; object-fit: cover; border-radius: 50%; box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 22%, transparent); }
@@ -38,6 +38,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .portal-toast { position: fixed; z-index: 50; top: 18px; left: 50%; display: flex; align-items: center; gap: 9px; width: max-content; max-width: calc(100vw - 32px); padding: 13px 18px; border: 1px solid #f0d5a6; border-radius: 14px; color: #704713; background: #fff9eb; box-shadow: 0 16px 45px rgb(57 39 18 / 18%); font-size: 14px; font-weight: 750; transform: translateX(-50%); }
 .portal-toast svg { width: 18px; height: 18px; flex: 0 0 auto; }
 .portal-layout { position: relative; z-index: 3; width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 58px 0 64px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(390px, .74fr); gap: clamp(48px, 7vw, 104px); align-items: center; }
+.portal-layout > * { min-width: 0; }
 .portal-hero { padding: 10px 0; }
 .eyebrow { display: inline-flex; align-items: center; gap: 7px; color: var(--accent, var(--brand)); font-size: 12px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
 .portal-hero h1 { max-width: 820px; margin: 0; font-size: clamp(48px, 5.8vw, 78px); line-height: 1.07; letter-spacing: -.055em; }
@@ -232,6 +233,12 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
   .links-panel { padding: 18px 13px; }
   .link-row { grid-template-columns: 62px minmax(0, 1fr) auto; }
   .link-row button { width: 34px; padding: 8px; font-size: 0; }
+}
+
+@media (max-width: 360px) {
+  .claim-card { padding: 24px 14px; }
+  .input-shell { gap: 8px; padding-inline: 12px; }
+  .code-shell button { padding-left: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
