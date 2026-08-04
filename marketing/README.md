@@ -11,13 +11,13 @@
 | `product-images/` | WFD、DI、SST、RS、WE 和五项合集商品主图 |
 | `detail-pages/` | 五个题型与五项合集的 HTML 详情页、共享样式和页面内展示截图 |
 | `detail-page-images/` | 从六个 HTML 详情页生成的商家后台连续竖图 |
-| `pte-academic-question-types/` | 22 个计分题型与 Personal Introduction 的核对稿、数据源和 4:3 简介图 |
+| `pte-academic-question-types/` | 22 个计分题型与 Personal Introduction 的源数据，以及本地生成的 3:4 竖版简介图 |
 | `../scripts/generate-marketing-images.mjs` | 竖图生成脚本 |
 | `../scripts/generate-pte-question-cards.mjs` | PTE Academic 全题型简介图生成脚本 |
 
 HTML 详情页是可编辑源文件，`detail-page-images/` 是生成结果。修改详情页文字、样式或图片后，应重新运行生成命令，不要单独手工修改输出 PNG。
 
-PTE Academic 全题型资料以 `pte-academic-question-types/question-types.json` 为唯一数据源，修改后运行 `npm run marketing:pte-cards`，同步更新核对稿、预览页和 23 张 PNG。
+PTE Academic 全题型资料以 `pte-academic-question-types/question-types.json` 为唯一数据源，修改后运行 `npm run marketing:pte-cards`，在本地生成核对稿、预览页和 23 张 PNG。这些生成结果不纳入 Git，只提交源数据、生成脚本、文档和测试。
 
 ## 五项合集详情页
 

@@ -25,8 +25,16 @@ const dataPath = join(contentRoot, "question-types.json");
 const previewPath = join(contentRoot, "index.html");
 const notesPath = join(contentRoot, "question-types.md");
 const outputDirectory = join(contentRoot, "cards");
-const WIDTH = 1200;
-const HEIGHT = 900;
+const WIDTH = 900;
+const HEIGHT = 1200;
+
+const WEIGHTING_SKILLS = [
+  { key: "overall", label: "总分", className: "weight-overall" },
+  { key: "listening", label: "听力", className: "weight-listening" },
+  { key: "reading", label: "阅读", className: "weight-reading" },
+  { key: "speaking", label: "口语", className: "weight-speaking" },
+  { key: "writing", label: "写作", className: "weight-writing" },
+];
 
 function escapeHtml(value) {
   return String(value)
@@ -39,12 +47,33 @@ function escapeHtml(value) {
 
 function sectionTheme(section) {
   if (section === "reading") {
-    return { accent: "#157F85", pale: "#E8F7F5", soft: "#CFEDEA" };
+    return {
+      accent: "#2F9E8F",
+      accentStrong: "#176F66",
+      pale: "#E8F8F3",
+      panel: "#DFF4EE",
+      secondary: "#F3A56B",
+      soft: "#C5EADF",
+    };
   }
   if (section === "listening") {
-    return { accent: "#B85C31", pale: "#FFF0E5", soft: "#F9D7C3" };
+    return {
+      accent: "#EB8268",
+      accentStrong: "#A94F43",
+      pale: "#FFF0EB",
+      panel: "#FFE8E1",
+      secondary: "#6E90DE",
+      soft: "#FFD1C5",
+    };
   }
-  return { accent: "#6F4CB3", pale: "#F0EAFC", soft: "#DFD2F7" };
+  return {
+    accent: "#8A66C9",
+    accentStrong: "#5E3E9B",
+    pale: "#F3EDFD",
+    panel: "#ECE2FA",
+    secondary: "#EE82AA",
+    soft: "#DDD0F4",
+  };
 }
 
 function renderTags(values) {
@@ -57,17 +86,37 @@ function renderRules(values) {
     .join("");
 }
 
-function renderCard(item, logoDataUrl, footer) {
+function renderWeighting(weighting) {
+  const cells = WEIGHTING_SKILLS.map(({ key, label, className }) => {
+    const value = weighting?.[key] ?? "—";
+    const inactiveClass = value === "—" ? " is-empty" : "";
+    return `<div class="weight-cell ${className}${inactiveClass}"><small>${label}</small><strong>${escapeHtml(value)}</strong></div>`;
+  }).join("");
+  const note = weighting
+    ? "五项分数分别独立计算；权重为平均测试中的指示性占比，不可直接换算为 10–90 分。"
+    : "Personal Introduction 不计分，因此未列入官方 PTE Academic question weighting table。";
+  return `<div class="weighting">
+            <div class="weighting-heading">
+              <div><span>OFFICIAL WEIGHTING</span><h4>PTE 官方平均题型权重</h4></div>
+              <small>平均测试 · 指示性占比</small>
+            </div>
+            <div class="weighting-grid">${cells}</div>
+            <p class="weighting-note">${escapeHtml(note)}</p>
+          </div>`;
+}
+
+function renderCard(item, logoDataUrl, footer, weighting) {
   const theme = sectionTheme(item.section);
   return `
     <article
       class="question-card"
       id="card-${escapeHtml(item.id)}"
       data-filename="${escapeHtml(item.filename)}"
-      style="--accent:${theme.accent};--pale:${theme.pale};--soft:${theme.soft}"
+      style="--accent:${theme.accent};--accent-strong:${theme.accentStrong};--pale:${theme.pale};--panel:${theme.panel};--secondary:${theme.secondary};--soft:${theme.soft}"
     >
       <div class="orb orb-one"></div>
       <div class="orb orb-two"></div>
+      <div class="orb orb-three"></div>
       <header class="card-header">
         <div class="brand">
           <img src="${logoDataUrl}" alt="小圆PTE突击 round logo">
@@ -92,13 +141,18 @@ function renderCard(item, logoDataUrl, footer) {
         </section>
         <aside class="scoring">
           <div class="scoring-topline"><span>SCORING</span><b>${escapeHtml(item.scoreType)}</b></div>
-          <h3>怎么评分</h3>
-          <div class="trait-tags">${renderTags(item.scoreTraits)}</div>
-          <p class="scoring-copy">${escapeHtml(item.scoring)}</p>
-          <div class="rules-box">
-            <h4>作答关键</h4>
-            <ol>${renderRules(item.rules)}</ol>
+          <div class="scoring-body">
+            <div class="scoring-detail">
+              <h3>怎么评分</h3>
+              <div class="trait-tags">${renderTags(item.scoreTraits)}</div>
+              <p class="scoring-copy">${escapeHtml(item.scoring)}</p>
+            </div>
+            <div class="rules-box">
+              <h4>作答关键</h4>
+              <ol>${renderRules(item.rules)}</ol>
+            </div>
           </div>
+          ${renderWeighting(weighting)}
         </aside>
       </main>
       <footer>
@@ -112,8 +166,9 @@ function buildPreview(data) {
   const logoDataUrl = "../detail-pages/logo.png";
   const regularFontDataUrl = "../../node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff2";
   const mediumFontDataUrl = "../../node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-600-normal.woff2";
+  const weightingById = new Map(data.weightingTable.map((row) => [row.id, row]));
   const cards = data.questionTypes
-    .map((item) => renderCard(item, logoDataUrl, data.footer))
+    .map((item) => renderCard(item, logoDataUrl, data.footer, weightingById.get(item.id)))
     .join("\n");
 
   return `<!doctype html>
@@ -126,49 +181,65 @@ function buildPreview(data) {
     @font-face{font-family:"Noto Sans SC";src:url("${regularFontDataUrl}") format("woff2");font-style:normal;font-weight:400;font-display:swap}
     @font-face{font-family:"Noto Sans SC";src:url("${mediumFontDataUrl}") format("woff2");font-style:normal;font-weight:600 900;font-display:swap}
     *{box-sizing:border-box}
-    html,body{margin:0;background:#DDD7CF;color:#29252D;font-family:"Noto Sans SC","Microsoft YaHei",Arial,sans-serif}
-    body{padding:48px;display:flex;flex-direction:column;align-items:flex-start;gap:40px}
-    .question-card{position:relative;width:1200px;height:900px;overflow:hidden;background:#FFFCF8;border-radius:0;isolation:isolate}
-    .question-card::before{content:"";position:absolute;inset:0 0 auto 0;height:12px;background:var(--accent);z-index:3}
+    html,body{margin:0;background:#E7E0EC;color:#352F3B;font-family:"Noto Sans SC","Microsoft YaHei",Arial,sans-serif}
+    body{padding:40px;display:flex;flex-direction:column;align-items:flex-start;gap:40px}
+    .question-card{position:relative;width:900px;height:1200px;overflow:hidden;background:linear-gradient(150deg,#FFFDFC 0%,#FFF9F7 58%,var(--pale) 145%);isolation:isolate}
+    .question-card::before{content:"";position:absolute;inset:0 0 auto 0;height:11px;background:linear-gradient(90deg,var(--accent),var(--secondary),#F5C56D);z-index:3}
     .orb{position:absolute;border-radius:999px;z-index:-1;pointer-events:none}
-    .orb-one{width:360px;height:360px;right:-150px;top:-170px;background:var(--pale)}
-    .orb-two{width:260px;height:260px;left:-120px;bottom:-150px;background:var(--pale)}
-    .card-header{height:122px;padding:31px 56px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E8E1D9}
+    .orb-one{width:330px;height:330px;right:-135px;top:-130px;background:var(--soft);opacity:.72}
+    .orb-two{width:240px;height:240px;left:-115px;bottom:-110px;background:#FFE3C7;opacity:.72}
+    .orb-three{width:125px;height:125px;right:58px;bottom:106px;background:#D9EEFF;opacity:.62}
+    .card-header{height:112px;padding:25px 46px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(111,85,118,.14)}
     .brand{display:flex;align-items:center;gap:14px}
-    .brand img{width:58px;height:58px;object-fit:contain;border-radius:50%;background:#fff;box-shadow:0 4px 16px rgba(37,28,48,.12)}
+    .brand img{width:56px;height:56px;object-fit:contain;border-radius:50%;background:#fff;box-shadow:0 6px 18px rgba(61,43,76,.14)}
     .brand div{display:flex;flex-direction:column;gap:1px}
-    .brand strong{font-size:21px;line-height:1.3;letter-spacing:.02em}
-    .brand small{font-size:13px;color:#817A83;letter-spacing:.08em}
-    .part-pill{padding:11px 18px;border-radius:999px;background:var(--pale);color:var(--accent);font-size:16px;font-weight:700;letter-spacing:.03em}
-    .card-content{height:706px;padding:44px 56px 32px;display:grid;grid-template-columns:1.07fr .93fr;gap:44px}
+    .brand strong{font-size:24px;line-height:1.25;letter-spacing:.01em}
+    .brand small{font-size:16px;color:#6F6573;letter-spacing:.06em;font-weight:600}
+    .part-pill{padding:11px 18px;border:1px solid color-mix(in srgb,var(--accent) 30%,white);border-radius:999px;background:rgba(255,255,255,.78);color:var(--accent-strong);font-size:18px;font-weight:800;letter-spacing:.02em;box-shadow:0 6px 16px rgba(73,48,89,.08)}
+    .card-content{height:1014px;padding:30px 46px 16px;display:flex;flex-direction:column}
     .overview{min-width:0;display:flex;flex-direction:column}
-    .eyebrow{display:flex;align-items:center;gap:10px;color:var(--accent);font-size:13px;font-weight:800;letter-spacing:.15em}
-    .eyebrow span{display:grid;place-items:center;min-width:38px;height:28px;padding:0 8px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;letter-spacing:.03em}
-    h1{margin:18px 0 0;font-family:Arial,"Noto Sans SC",sans-serif;font-size:49px;line-height:1.08;letter-spacing:-.035em;color:#28232D}
-    h2{margin:7px 0 0;color:var(--accent);font-size:27px;line-height:1.3;font-weight:700}
-    .task-block{margin-top:32px;padding-left:20px;border-left:5px solid var(--accent)}
-    .task-block h3,.scoring h3{margin:0 0 10px;font-size:22px;line-height:1.3}
-    .task-block p{margin:0;color:#514B55;font-size:20px;line-height:1.68}
-    .facts{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .facts div{min-height:84px;padding:14px 16px;border:1px solid #E6DED5;border-radius:14px;background:rgba(255,255,255,.8);display:flex;flex-direction:column;gap:6px}
-    .facts div:first-child{grid-column:1/-1}
-    .facts small{color:#8A8288;font-size:13px;font-weight:600;letter-spacing:.06em}
-    .facts strong{font-size:16px;line-height:1.45;color:#37313A}
-    .scoring{align-self:stretch;padding:30px 30px 26px;border-radius:26px;background:#2E2933;color:#fff;display:flex;flex-direction:column;box-shadow:0 20px 45px rgba(47,40,55,.14)}
-    .scoring-topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
-    .scoring-topline>span{font-family:Arial,sans-serif;color:#BDB5C3;font-size:12px;font-weight:700;letter-spacing:.18em}
-    .scoring-topline b{padding:7px 12px;border-radius:999px;background:var(--accent);font-size:13px;letter-spacing:.03em}
-    .scoring h3{font-size:27px;margin-bottom:16px}
-    .trait-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
-    .trait-tags span{padding:7px 11px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:rgba(255,255,255,.08);font-size:13px;line-height:1.25}
-    .scoring-copy{margin:0;color:#EEE9F1;font-size:17px;line-height:1.7}
-    .rules-box{margin-top:auto;padding:19px 20px 17px;border-radius:18px;background:#FFFCF8;color:#352F38}
-    .rules-box h4{margin:0 0 13px;color:var(--accent);font-size:16px;letter-spacing:.06em}
-    .rules-box ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-    .rules-box li{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.42}
-    .rules-box li b{flex:0 0 23px;height:23px;border-radius:50%;display:grid;place-items:center;background:var(--pale);color:var(--accent);font-size:12px}
-    footer{height:72px;padding:0 56px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #E8E1D9;color:#9A9399;font-size:12px;letter-spacing:.025em}
-    footer span:last-child{color:#B0A9AE;font-family:Arial,"Noto Sans SC",sans-serif;letter-spacing:.08em}
+    .eyebrow{display:flex;align-items:center;gap:10px;color:var(--accent-strong);font-size:16px;font-weight:800;letter-spacing:.12em}
+    .eyebrow span{display:grid;place-items:center;min-width:44px;height:32px;padding:0 10px;border-radius:9px;background:var(--accent);color:#fff;font-size:16px;letter-spacing:.02em;box-shadow:0 5px 14px color-mix(in srgb,var(--accent) 28%,transparent)}
+    h1{margin:14px 0 0;font-family:Arial,"Noto Sans SC",sans-serif;font-size:43px;line-height:1.08;letter-spacing:-.035em;color:#332C39}
+    h2{margin:6px 0 0;color:var(--accent-strong);font-size:30px;line-height:1.25;font-weight:800}
+    .task-block{margin-top:18px;padding:14px 20px 15px;border-left:7px solid var(--secondary);border-radius:0 18px 18px 0;background:var(--pale)}
+    .task-block h3,.scoring h3{margin:0 0 6px;font-size:24px;line-height:1.25}
+    .task-block p{margin:0;color:#463D4A;font-size:22px;line-height:1.48;font-weight:500}
+    .facts{margin-top:14px;display:grid;grid-template-columns:1.25fr 1fr .82fr;gap:10px}
+    .facts div{min-height:94px;padding:12px 14px;border:1px solid rgba(99,78,103,.18);border-radius:16px;background:rgba(255,255,255,.86);display:flex;flex-direction:column;gap:5px;box-shadow:0 7px 18px rgba(70,51,79,.06)}
+    .facts small{color:#6F636F;font-size:16px;font-weight:800;letter-spacing:.04em}
+    .facts strong{font-size:20px;line-height:1.34;color:#302936;font-weight:800}
+    .scoring{margin-top:16px;min-height:0;flex:1;padding:20px 24px 18px;border:2px solid color-mix(in srgb,var(--accent) 48%,white);border-radius:28px;background:linear-gradient(145deg,rgba(255,255,255,.64),var(--panel));color:#3D3442;display:flex;flex-direction:column;box-shadow:0 18px 42px rgba(65,45,80,.13)}
+    .scoring-topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .scoring-topline>span{font-family:Arial,sans-serif;color:var(--accent-strong);font-size:16px;font-weight:900;letter-spacing:.16em}
+    .scoring-topline b{padding:8px 13px;border-radius:999px;background:var(--accent);color:#fff;font-size:18px;letter-spacing:.02em;box-shadow:0 5px 14px color-mix(in srgb,var(--accent) 28%,transparent)}
+    .scoring-body{display:grid;grid-template-columns:1fr;gap:12px;align-items:stretch}
+    .scoring-detail{min-width:0;padding:2px 1px}
+    .scoring h3{font-size:28px;margin-bottom:9px;color:#332A37}
+    .trait-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+    .trait-tags span{padding:6px 10px;border:1px solid rgba(82,61,91,.17);border-radius:999px;background:rgba(255,255,255,.78);color:var(--accent-strong);font-size:16px;font-weight:800;line-height:1.2}
+    .scoring-copy{margin:0;color:#463C4B;font-size:20px;line-height:1.48;font-weight:500}
+    .rules-box{padding:14px 16px 13px;border:1px solid rgba(96,76,102,.16);border-radius:19px;background:rgba(255,255,255,.8);color:#352D3A}
+    .rules-box h4{margin:0 0 10px;color:var(--accent-strong);font-size:21px;letter-spacing:.04em}
+    .rules-box ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .rules-box li{display:flex;align-items:flex-start;gap:8px;font-size:18px;line-height:1.38;font-weight:600}
+    .rules-box li b{flex:0 0 27px;height:27px;border-radius:50%;display:grid;place-items:center;background:var(--pale);color:var(--accent-strong);font-size:15px}
+    .weighting{margin-top:auto;padding:13px 15px 12px;border:1px solid rgba(92,72,100,.17);border-radius:20px;background:rgba(255,255,255,.86)}
+    .weighting-heading{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:9px}
+    .weighting-heading>div{display:flex;align-items:baseline;gap:9px}
+    .weighting-heading span{font-family:Arial,sans-serif;color:var(--accent-strong);font-size:12px;font-weight:900;letter-spacing:.12em}
+    .weighting-heading h4{margin:0;color:#342B39;font-size:20px}
+    .weighting-heading>small{color:#6F6573;font-size:14px;font-weight:600}
+    .weighting-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    .weight-cell{min-height:67px;padding:8px 8px 7px;border:1px solid rgba(80,68,88,.13);border-top-width:6px;border-radius:11px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+    .weight-cell small{color:#665B69;font-size:17px;font-weight:800}
+    .weight-cell strong{font-family:Arial,"Noto Sans SC",sans-serif;color:#29222E;font-size:31px;line-height:1.05}
+    .weight-cell.is-empty{opacity:.42;background:#F7F4F7}
+    .weight-overall{border-top-color:#8A66C9}.weight-listening{border-top-color:#6E9EDC}.weight-reading{border-top-color:#48AF96}.weight-speaking{border-top-color:#ED82AA}.weight-writing{border-top-color:#F0A25E}
+    .weighting-note{margin:8px 0 0;color:#665C69;font-size:14px;line-height:1.36;font-weight:600}
+    footer{height:74px;padding:0 46px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(111,85,118,.14);color:#655B69;font-size:16px;letter-spacing:.01em}
+    footer span:first-child{font-weight:600;color:#665B6A}
+    footer span:last-child{color:#918795;font-family:Arial,"Noto Sans SC",sans-serif;letter-spacing:.07em}
   </style>
 </head>
 <body>
@@ -194,12 +265,18 @@ function buildNotes(data) {
     "## 整理范围",
     "",
     "当前官网列出 22 个计分题型：Speaking & Writing 9 个、Reading 5 个、Listening 8 个。另整理 1 个不计分的 Personal Introduction，因此共生成 23 张图片。",
+    "每个计分题型同时补充 Pearson 官方 PTE Academic question weighting table 中的 Overall、Listening、Reading、Speaking、Writing 平均权重。百分比是平均测试中的指示性占比，各分数分别计算，不能直接换算为 10–90 分。",
     "",
   ];
+  const weightingById = new Map(data.weightingTable.map((row) => [row.id, row]));
 
   for (const [section, title] of sections) {
     lines.push(`## ${title}`, "");
     for (const item of data.questionTypes.filter((candidate) => candidate.section === section)) {
+      const weighting = weightingById.get(item.id);
+      const weightingSummary = weighting
+        ? WEIGHTING_SKILLS.map(({ key, label }) => `${label} ${weighting[key] ?? "—"}`).join("；")
+        : "不计分，未列入官方权重表";
       lines.push(
         `### ${item.name}｜${item.nameZh}`,
         "",
@@ -208,6 +285,7 @@ function buildNotes(data) {
         `- 作答时间：${item.answerTime}`,
         `- 计分技能：${item.skills}`,
         `- 评分方式：${item.scoreType}；${item.scoring}`,
+        `- 官方平均权重：${weightingSummary}。`,
         `- 作答关键：${item.rules.join("；")}。`,
         `- 官方来源：${item.source}`,
         "",
@@ -220,7 +298,7 @@ function buildNotes(data) {
     "",
     "- Pearson Reading 页面当前在 Multiple Choice, Multiple Answers 的“如何评分”位置重复显示了 Fill in the Blanks (Dropdown) 的段落；本整理采用同一题型测试提示中明确写出的规则：正确选择得分，错误选择会扣分。",
     "- 页面中标注为 Not applicable 的单题作答时间统一写为“未设单题时长”，避免误导为无限时间；考生仍受对应考试部分的总时长限制。",
-    "- 图片中的字数、准备时间、录音时间、音频长度和评分项均来自核对日期当天的 Pearson PTE 页面。",
+    "- 图片中的字数、准备时间、录音时间、音频长度和评分项均来自核对日期当天的 Pearson PTE 页面；权重来自 Pearson 的 PTE Academic Scoring Information for Teachers and Partners。",
     "",
     "## 官方页面",
     "",
@@ -228,6 +306,7 @@ function buildNotes(data) {
     "- Speaking & Writing：https://www.pearsonpte.com/pte-academic/test-format/speaking-writing/",
     "- Reading：https://www.pearsonpte.com/pte-academic/test-format/reading/",
     "- Listening：https://www.pearsonpte.com/pte-academic/test-format/listening/",
+    `- 官方题型权重表：${data.weightingSource}`,
     "",
   );
   return `${lines.join("\n").trimEnd()}\n`;
@@ -252,6 +331,7 @@ async function preparePage(cdp) {
           image.addEventListener("error", resolveImage, { once: true });
         });
       }));
+      await Promise.all(Array.from(document.images, (image) => image.decode?.().catch(() => undefined)));
       await new Promise((resolveFrame) => requestAnimationFrame(() => requestAnimationFrame(resolveFrame)));
       return {
         cardCount: document.querySelectorAll(".question-card").length,
@@ -312,12 +392,15 @@ async function renderCards(data, browserPath) {
     cleanPreviousCards();
     for (const item of data.questionTypes) {
       const rectResult = await pageCdp.send("Runtime.evaluate", {
-        expression: `(() => {
+        expression: `(async () => {
           const card = document.getElementById(${JSON.stringify(`card-${item.id}`)});
           if (!card) return null;
+          card.scrollIntoView({ block: "start", inline: "start" });
+          await new Promise((resolveFrame) => requestAnimationFrame(() => requestAnimationFrame(resolveFrame)));
           const rect = card.getBoundingClientRect();
           return { x: rect.x + scrollX, y: rect.y + scrollY, width: rect.width, height: rect.height };
         })()`,
+        awaitPromise: true,
         returnByValue: true,
       });
       const rect = rectResult.result.value;
