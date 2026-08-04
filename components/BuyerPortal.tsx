@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Clock3,
   Download,
-  ExternalLink,
   FileArchive,
   LoaderCircle,
   LockKeyhole,
@@ -23,7 +22,7 @@ import {
   getCelebrationPhase,
   getCelebrationRibbonVisualShape,
 } from "@/lib/celebration";
-import { isEmbeddedWebView } from "@/lib/browser";
+import { getEmbeddedWebViewPlatform, type EmbeddedWebViewPlatform } from "@/lib/browser";
 import { formatLocalTime, recommendedDownloadDeadline } from "@/lib/domain";
 
 type Phase = "GENERATION_OPEN" | "DOWNLOAD_ONLY" | "EXPIRED";
@@ -92,7 +91,7 @@ export function BuyerPortal({ token }: { token: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [progress, setProgress] = useState(12);
-  const [embeddedWebView, setEmbeddedWebView] = useState(false);
+  const [embeddedWebViewPlatform, setEmbeddedWebViewPlatform] = useState<EmbeddedWebViewPlatform>(null);
 
   const loadStatus = useCallback(async () => {
     const response = await fetch(`/api/public/${token}/status`, { cache: "no-store" });
@@ -111,7 +110,7 @@ export function BuyerPortal({ token }: { token: string }) {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setEmbeddedWebView(isEmbeddedWebView(window.navigator.userAgent));
+      setEmbeddedWebViewPlatform(getEmbeddedWebViewPlatform(window.navigator.userAgent));
     }, 0);
     return () => window.clearTimeout(timer);
   }, []);
@@ -244,13 +243,13 @@ export function BuyerPortal({ token }: { token: string }) {
         <div className="secure-chip"><ShieldCheck size={16} /> 安全验证</div>
       </header>
 
-      {embeddedWebView && (
+      {embeddedWebViewPlatform && (
         <aside className="browser-recommendation" role="alert">
-          <ExternalLink aria-hidden="true" />
-          <div>
-            <strong>建议在浏览器中打开</strong>
-            <span>当前为应用内置浏览器，下载可能无法保存。请点击右上角菜单选择“在浏览器中打开”，建议使用 Edge、Safari 或 Chrome。</span>
-          </div>
+          <strong>请换到浏览器下载</strong>
+          <span>当前使用的是应用内置浏览器，直接下载可能没有反应。</span>
+          <span className="browser-instruction">苹果用户：点击右上角菜单，选择“Safari打开”。</span>
+          <span className="browser-instruction">安卓用户：点击右上角菜单，选择“浏览器打开”。</span>
+          <span>也可以复制链接到你喜欢的浏览器。推荐 Safari、Edge 或 Chrome。</span>
         </aside>
       )}
 

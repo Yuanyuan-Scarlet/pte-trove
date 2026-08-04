@@ -37,11 +37,10 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .secure-chip { margin-left: auto; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid color-mix(in srgb, var(--accent) 22%, white); border-radius: 999px; color: color-mix(in srgb, var(--accent) 76%, #18373b); background: color-mix(in srgb, var(--accent) 7%, white); font-size: 12px; font-weight: 700; }
 .portal-toast { position: fixed; z-index: 50; top: 18px; left: 50%; display: flex; align-items: center; gap: 9px; width: max-content; max-width: calc(100vw - 32px); padding: 13px 18px; border: 1px solid #f0d5a6; border-radius: 14px; color: #704713; background: #fff9eb; box-shadow: 0 16px 45px rgb(57 39 18 / 18%); font-size: 14px; font-weight: 750; transform: translateX(-50%); }
 .portal-toast svg { width: 18px; height: 18px; flex: 0 0 auto; }
-.browser-recommendation { position: relative; z-index: 4; width: min(1180px, calc(100% - 40px)); margin: 20px auto -28px; padding: 14px 16px; display: flex; align-items: flex-start; gap: 11px; border: 1px solid #f0c879; border-radius: 16px; color: #68440d; background: #fff8e8; box-shadow: 0 12px 30px rgb(86 57 15 / 10%); }
-.browser-recommendation > svg { width: 21px; height: 21px; flex: 0 0 auto; margin-top: 1px; }
-.browser-recommendation > div { display: flex; flex-direction: column; gap: 3px; }
-.browser-recommendation strong { font-size: 14px; }
-.browser-recommendation span { font-size: 12px; line-height: 1.6; }
+.browser-recommendation { position: relative; z-index: 4; width: min(1180px, calc(100% - 40px)); margin: 20px auto -28px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; border: 1px solid #f0c879; border-radius: 16px; color: #68440d; background: #fff8e8; box-shadow: 0 12px 30px rgb(86 57 15 / 10%); }
+.browser-recommendation > strong { font-size: 15px; }
+.browser-recommendation > span { font-size: 12px; line-height: 1.6; }
+.browser-instruction { margin-top: 4px; color: #442b06; font-weight: 800; }
 .portal-layout { position: relative; z-index: 3; width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 58px 0 64px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(390px, .74fr); gap: clamp(48px, 7vw, 104px); align-items: center; }
 .portal-layout > * { min-width: 0; }
 .portal-hero { padding: 10px 0; }

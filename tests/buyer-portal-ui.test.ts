@@ -20,9 +20,17 @@ test("renders the revised buyer portal messaging and hierarchy", async () => {
   assert.ok(source.includes('"/design-preview/congratulations-watercolor.png"'));
   assert.ok(source.includes('<>解锁 <em>{status.entryMeta.label}</em> 宝藏资料</>'));
   assert.ok(source.includes("完成身份验证，领取你的专属资料"));
-  assert.ok(source.includes("setEmbeddedWebView(isEmbeddedWebView(window.navigator.userAgent))"));
+  assert.ok(source.includes("setEmbeddedWebViewPlatform(getEmbeddedWebViewPlatform(window.navigator.userAgent))"));
   assert.ok(source.includes('className="browser-recommendation" role="alert"'));
-  assert.ok(source.includes("建议使用 Edge、Safari 或 Chrome"));
+  assert.ok(source.includes("请换到浏览器下载"));
+  assert.ok(source.includes("当前使用的是应用内置浏览器，直接下载可能没有反应。"));
+  assert.ok(!source.includes("•••"));
+  assert.ok(source.includes("苹果用户：点击右上角菜单，选择“Safari打开”。"));
+  assert.ok(source.includes("安卓用户：点击右上角菜单，选择“浏览器打开”。"));
+  assert.ok(source.includes("也可以复制链接到你喜欢的浏览器。推荐 Safari、Edge 或 Chrome。"));
+  assert.ok(!source.includes("BrowserMenuDots"));
+  assert.ok(!source.includes("browser-menu-symbol"));
+  assert.ok(!source.includes("ExternalLink"));
   assert.ok(source.includes('className="step-kicker">ready'));
   assert.ok(source.includes("专属资料已就绪"));
   assert.ok(source.includes("formatLocalTime(downloadReminderDeadline)"));
@@ -47,6 +55,7 @@ test("renders the buyer portal logo as a circle and reduces the detail title", a
   assert.match(styles, /\.download-reminder strong \{[^}]*color: var\(--accent\);[^}]*background: #f6f0ee;[^}]*white-space: nowrap;[^}]*\}/);
   assert.doesNotMatch(styles, /\.download-reminder strong \{[^}]*color-mix\(/);
   assert.match(styles, /\.browser-recommendation \{[^}]*background: #fff8e8;[^}]*\}/);
+  assert.doesNotMatch(styles, /\.browser-menu-symbol/);
 });
 
 test("keeps the buyer portal within ultra-narrow mobile viewports", async () => {
