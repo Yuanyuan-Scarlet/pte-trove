@@ -20,6 +20,7 @@
     "test:all": "npm run build && npm test",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "marketing:images": "node scripts/generate-marketing-images.mjs",
+    "marketing:square-cards": "node scripts/generate-square-material-cards.mjs",
     "marketing:pte-cards": "node scripts/generate-pte-question-cards.mjs",
     "db:generate": "drizzle-kit generate",
     "admin:hash": "node scripts/hash-admin-password.mjs"

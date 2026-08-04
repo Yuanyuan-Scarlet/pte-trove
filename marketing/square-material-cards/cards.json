@@ -1,0 +1,169 @@
+{
+  "products": [
+    {
+      "slug": "wfd",
+      "code": "WFD",
+      "name": "Write From Dictation",
+      "nameZh": "听写冲刺",
+      "accent": "#0066FF",
+      "accentSoft": "#EAF3FF",
+      "title": "WFD 听写突击宝藏",
+      "hook": "原句、发音、中文理解、分段记忆、首字母复现，一份资料串起来。",
+      "tags": ["纯 PDF 图文", "高频原句", "音标 + 翻译", "图标分段", "首字母复现"],
+      "facts": [
+        { "value": "3–5 秒", "label": "短句音频", "copy": "信息密度高，听后迅速保留关键词和语序。" },
+        { "value": "1 次", "label": "只播放一遍", "copy": "边听边抓骨架，减少对回放的依赖。" },
+        { "value": "逐词得分", "label": "拼写很重要", "copy": "完整度、词序和拼写一起练。" }
+      ],
+      "structureTitle": "从看懂到默出来",
+      "structureSubtitle": "一条句子拆成四层信息，每一步都有抓手。",
+      "structure": [
+        { "marker": "听", "title": "原句与音标配套", "copy": "对齐声音与文字，发现容易误听的词。" },
+        { "marker": "懂", "title": "中文翻译辅助理解", "copy": "先理解句意，再记词序和表达。" },
+        { "marker": "拆", "title": "图标 + 意群分段", "copy": "把长句拆成几个可记忆的小块。" },
+        { "marker": "默", "title": "首字母主动回忆", "copy": "从看着会，推进到真正能复现。" }
+      ],
+      "previewImages": ["wfd-material.png"],
+      "previewTitle": "真实资料内页",
+      "previewCopy": "原句、音标、中文翻译、分段图标与首字母提示，在同一页清楚呈现。",
+      "steps": [
+        { "label": "第 1 轮", "title": "快速过题", "copy": "理解句意、熟悉发音，标记陌生句。" },
+        { "label": "第 2 轮", "title": "首字母复现", "copy": "遮住原句，根据分段完整说出或写出。" },
+        { "label": "第 3 轮", "title": "只查错题", "copy": "集中回炉遗漏词、词序和拼写错误。" }
+      ],
+      "cta": "早用一天，多背亿点！"
+    },
+    {
+      "slug": "di",
+      "code": "DI",
+      "name": "Describe Image",
+      "nameZh": "看图口述",
+      "accent": "#FF6D01",
+      "accentSoft": "#FFF0DF",
+      "title": "DI 看图口述高分宝藏",
+      "hook": "图片、重点词和可替换例句放在一起，帮你从看懂练到开口。",
+      "tags": ["纯 PDF 图文", "全类型图片", "10+ 重点词", "10+ 例句", "音标 + 翻译"],
+      "facts": [
+        { "value": "25 秒", "label": "看图准备", "copy": "快速判断类型、主题、趋势和显著细节。" },
+        { "value": "40 秒", "label": "完成口述", "copy": "按总览、重点、补充、总结组织。" },
+        { "value": "1 次", "label": "一次录音", "copy": "稳定开口，保持连贯的答题节奏。" }
+      ],
+      "structureTitle": "图 + 词 + 句",
+      "structureSubtitle": "先练会说，再练限时说。",
+      "structure": [
+        { "marker": "看", "title": "全类型图片覆盖", "copy": "流程图、柱状图、饼图、地图、表格等。" },
+        { "marker": "认", "title": "10+ 重点词", "copy": "每个单词配图标、音标和中文翻译。" },
+        { "marker": "读", "title": "单词与例句全程注音", "copy": "确认发音和意思后再开口。" },
+        { "marker": "说", "title": "10+ 例句可替换训练", "copy": "从单句练到完整描述，形成自己的表达。" }
+      ],
+      "previewImages": ["di-material-1.png", "di-material-2.png"],
+      "previewTitle": "连续两页真实展示",
+      "previewCopy": "图片 → 重点词 → 例句，音标、图标和翻译清楚排在一起。",
+      "steps": [
+        { "label": "第 1 轮", "title": "按图片类型刷词", "copy": "让常见图表词能立刻说出口。" },
+        { "label": "第 2 轮", "title": "模仿例句", "copy": "保留句型骨架，替换数字、对象和趋势。" },
+        { "label": "第 3 轮", "title": "25 + 40 秒模拟", "copy": "在限时中保持专注、发音和连贯。" }
+      ],
+      "cta": "看图不再慌，开口更有底气。"
+    },
+    {
+      "slug": "sst",
+      "code": "SST",
+      "name": "Summarize Spoken Text",
+      "nameZh": "听力总结",
+      "accent": "#F5A400",
+      "accentSoft": "#FFF5D9",
+      "title": "SST 听力总结突击宝藏",
+      "hook": "英文原文、超快记忆和关键词三层组织，把长音频压缩成可记住的锚点。",
+      "tags": ["纯 PDF 图文", "高频题目", "完整答案", "中文图标记忆", "音标 + 翻译"],
+      "facts": [
+        { "value": "50–70 词", "label": "摘要长度", "copy": "覆盖主旨与重点，控制无关细节。" },
+        { "value": "10 分钟", "label": "完成作答", "copy": "组织信息、写作，并留出检查时间。" },
+        { "value": "听 + 写", "label": "综合能力", "copy": "听出层次，再用准确英语重新表达。" }
+      ],
+      "structureTitle": "三步记忆系统",
+      "structureSubtitle": "英文原文 → 超快记忆 → 关键词 → 模板串联。",
+      "structure": [
+        { "marker": "读", "title": "英文原文 · 完整答案", "copy": "关键词高亮，快速看清摘要骨架。" },
+        { "marker": "记", "title": "超快记忆 · 中英图标", "copy": "先建立中文逻辑，再记英文关键词。" },
+        { "marker": "背", "title": "关键词 · 音标翻译", "copy": "会认、会拼、会发音。" },
+        { "marker": "套", "title": "模板串联", "copy": "把关键词组织成 50–70 词摘要。" }
+      ],
+      "previewImages": ["sst-material.png"],
+      "previewTitle": "真实资料内页",
+      "previewCopy": "完整答案、关键词高亮、中文图标理解和关键词表，层次清楚。",
+      "steps": [
+        { "label": "第 1 步", "title": "先中文后英文", "copy": "快速理解大意，建立内容框架。" },
+        { "label": "第 2 步", "title": "记牢关键词", "copy": "做到会认、会拼、听到能反应。" },
+        { "label": "第 3 步", "title": "模板串联", "copy": "用简易模板写出完整摘要并检查。" }
+      ],
+      "cta": "抓住重点，SST 就稳稳拿分。"
+    },
+    {
+      "slug": "rs",
+      "code": "RS",
+      "name": "Repeat Sentence",
+      "nameZh": "复述句子",
+      "accent": "#EC5B99",
+      "accentSoft": "#FFF0F6",
+      "title": "RS 复述句子突击宝藏",
+      "hook": "原句、音标、中文、意群图标和首字母提示，帮你把长句切块再连贯说出。",
+      "tags": ["纯 PDF 图文", "完整原句", "音标 + 翻译", "意群图标", "首字母复述"],
+      "facts": [
+        { "value": "3–9 秒", "label": "句子音频", "copy": "快速捕捉重音词、语块和句子节奏。" },
+        { "value": "15 秒", "label": "完成复述", "copy": "提示音后立即开口，清楚说完。" },
+        { "value": "听 + 说", "label": "评分维度", "copy": "内容、发音和流利度一起练。" }
+      ],
+      "structureTitle": "长句切成块",
+      "structureSubtitle": "听到、记住、说出，记忆有落脚点。",
+      "structure": [
+        { "marker": "听", "title": "原句 + 音标", "copy": "发现连读、弱读和容易误听的声音。" },
+        { "marker": "切", "title": "按意群记忆", "copy": "把长句切成 2–4 个可抓住的语块。" },
+        { "marker": "连", "title": "图标连接句意", "copy": "用画面记住动作和对象。" },
+        { "marker": "说", "title": "首字母触发复述", "copy": "逐步减少提示，辅助主动背诵。" }
+      ],
+      "previewImages": ["rs-material.png"],
+      "previewTitle": "真实资料内页",
+      "previewCopy": "原句、音标、翻译、意群分段与首字母提示，实际排版一目了然。",
+      "steps": [
+        { "label": "热身", "title": "看原句朗读", "copy": "先把重音、停顿和节奏说顺。" },
+        { "label": "强化", "title": "只看提示复述", "copy": "根据图标和首字母持续输出。" },
+        { "label": "模拟", "title": "闭屏限时复述", "copy": "自查停顿、漏词和发音，再回看修正。" }
+      ],
+      "cta": "多说一遍，考场就多稳一点。"
+    },
+    {
+      "slug": "we",
+      "code": "WE",
+      "name": "Write Essay",
+      "nameZh": "议论文写作",
+      "accent": "#8A3FFC",
+      "accentSoft": "#F3EDFF",
+      "title": "WE 议论文观点宝库",
+      "hook": "中英双语题目、正反观点和展开思路，帮你先解决写什么，再练怎么写完整。",
+      "tags": ["纯 PDF 图文", "英文题目 + 中文", "正反观点", "高频话题", "观点展开"],
+      "facts": [
+        { "value": "20 分钟", "label": "完整作答", "copy": "快速定立场，完成构思、写作和检查。" },
+        { "value": "200–300 词", "label": "规定篇幅", "copy": "内容充分，同时避免重复表达。" },
+        { "value": "议论文", "label": "回应题目", "copy": "用解释和例子支撑清晰观点。" }
+      ],
+      "structureTitle": "先解决写什么",
+      "structureSubtitle": "再练怎么写得完整。",
+      "structure": [
+        { "marker": "读", "title": "题目双语呈现", "copy": "先准确理解争议点和作答范围。" },
+        { "marker": "选", "title": "正反观点成组整理", "copy": "快速选择最熟悉、最好发展的论点。" },
+        { "marker": "展", "title": "提炼与例句配套", "copy": "让主体段拥有解释和支撑。" },
+        { "marker": "组", "title": "形成个人素材库", "copy": "跨话题复用因果、影响和举例逻辑。" }
+      ],
+      "previewImages": ["we-material.png"],
+      "previewTitle": "真实资料内页",
+      "previewCopy": "英文题目、中文翻译、正反观点、提炼说明与例句，实际内容清楚可见。",
+      "steps": [
+        { "label": "前 5 分钟", "title": "审题 + 打模板", "copy": "确认立场，准备两组主体观点。" },
+        { "label": "关键 10 分钟", "title": "填充观点", "copy": "把观点、解释和例子扩成完整段落。" },
+        { "label": "最后 5 分钟", "title": "检查", "copy": "核对字数、拼写、语法和题目回应。" }
+      ],
+      "cta": "不再怕没观点，下笔更快、更稳。"
+    }
+  ]
+}
