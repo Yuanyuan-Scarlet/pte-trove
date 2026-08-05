@@ -1,4 +1,4 @@
-import { isMaterialUploadSizeAllowed, MATERIAL_TYPES, MATERIAL_UPLOAD_LIMIT_MIB, type MaterialType } from "./constants";
+import { isMaterialUploadSizeAllowed, MATERIAL_TYPES, MATERIAL_UPLOAD_LIMIT_MIB, type MaterialType, type ProductEntry } from "./constants";
 import { calculateDeadlines, getLinkPhase } from "./domain";
 import { all, first, run } from "./db";
 import { randomId, sha256Bytes } from "./crypto";
@@ -85,6 +85,13 @@ export async function publishVersion(versionId: string) {
   return { publishedAt, generationDeadline, expiresAt, links };
 }
 
+interface EntryStatsRow {
+  material_version_id: string;
+  product_entry: ProductEntry;
+  binding_count: number;
+  succeeded_count: number;
+}
+
 export async function listVersions(origin: string) {
   const rows = await all<VersionRow>(
     `SELECT mv.id, mv.display_name, mv.status, mv.created_at, mv.published_at, mv.generation_deadline, mv.expires_at,
@@ -96,6 +103,20 @@ export async function listVersions(origin: string) {
      LEFT JOIN generation_jobs gj ON gj.buyer_binding_id = bb.id
      GROUP BY mv.id ORDER BY mv.created_at DESC`,
   );
+  const statsRows = await all<EntryStatsRow>(
+    `SELECT bb.material_version_id, bb.product_entry,
+      COUNT(bb.id) AS binding_count,
+      SUM(CASE WHEN gj.status = 'SUCCEEDED' THEN 1 ELSE 0 END) AS succeeded_count
+     FROM buyer_bindings bb
+     LEFT JOIN generation_jobs gj ON gj.buyer_binding_id = bb.id
+     GROUP BY bb.material_version_id, bb.product_entry`,
+  );
+  const statsByVersion = new Map<string, Array<{ entry: ProductEntry; bindingCount: number; succeededCount: number }>>();
+  for (const stats of statsRows) {
+    const list = statsByVersion.get(stats.material_version_id) ?? [];
+    list.push({ entry: stats.product_entry, bindingCount: Number(stats.binding_count), succeededCount: Number(stats.succeeded_count) });
+    statsByVersion.set(stats.material_version_id, list);
+  }
   return Promise.all(rows.map(async (row) => ({
     id: row.id,
     displayName: row.display_name,
@@ -106,10 +127,50 @@ export async function listVersions(origin: string) {
     expiresAt: row.expires_at,
     assetCount: Number(row.asset_count),
     generationCount: Number(row.generation_count),
+    entryStats: statsByVersion.get(row.id) ?? [],
     links: row.status === "PUBLISHED"
       ? (await listProductLinks(row.id)).map((link) => ({ entry: link.entry, url: `${origin}/g/${link.token}` }))
       : [],
   })));
+}
+
+interface BindingDetailRow {
+  id: string;
+  product_entry: ProductEntry;
+  phone: string;
+  order_number: string;
+  created_at: number;
+  job_status: string | null;
+  job_completed_at: number | null;
+  error_code: string | null;
+  file_status: string | null;
+  generated_at: number | null;
+}
+
+export async function listVersionBindings(versionId: string) {
+  const rows = await all<BindingDetailRow>(
+    `SELECT bb.id, bb.product_entry, bb.phone, bb.order_number, bb.created_at,
+      gj.status AS job_status, gj.completed_at AS job_completed_at, gj.error_code,
+      gf.status AS file_status, gf.generated_at
+     FROM buyer_bindings bb
+     LEFT JOIN generation_jobs gj ON gj.buyer_binding_id = bb.id
+     LEFT JOIN generated_files gf ON gf.generation_job_id = gj.id
+     WHERE bb.material_version_id = ?
+     ORDER BY bb.product_entry, bb.created_at DESC`,
+    versionId,
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    entry: row.product_entry,
+    phone: row.phone,
+    orderNumber: row.order_number,
+    createdAt: row.created_at,
+    jobStatus: row.job_status,
+    jobCompletedAt: row.job_completed_at,
+    errorCode: row.error_code,
+    fileStatus: row.file_status,
+    generatedAt: row.generated_at,
+  }));
 }
 
 export async function listAssets(versionId: string) {

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { GET as downloadManual } from "../app/api/admin/manual-generations/[manualId]/download/route";
+import { GET as listBindings } from "../app/api/admin/versions/[versionId]/bindings/route";
 import { GET as listManual, POST as createManual } from "../app/api/admin/versions/[versionId]/manual-generations/route";
 
 const versionContext = { params: Promise.resolve({ versionId: "version-1" }) };
@@ -27,6 +28,11 @@ test("rejects creating a manual generation without an admin session", async () =
 
 test("rejects downloading a manual generation without an admin session", async () => {
   const response = await downloadManual(new Request("http://localhost:3000/api/admin/manual-generations/manual-1/download"), manualContext);
+  await assertAdminRequired(response);
+});
+
+test("rejects listing version bindings without an admin session", async () => {
+  const response = await listBindings(new Request("http://localhost:3000/api/admin/versions/version-1/bindings"), versionContext);
   await assertAdminRequired(response);
 });
 

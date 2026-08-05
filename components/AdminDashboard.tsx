@@ -4,6 +4,7 @@ import { Check, Clipboard, FileCheck2, FileUp, Link2, LoaderCircle, LogOut, Plus
 import Image from "next/image";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { MATERIAL_TYPES, MATERIAL_UPLOAD_LIMIT_MIB } from "@/lib/constants";
+import { BindingRecordsPanel } from "@/components/BindingRecordsPanel";
 import { ManualGenerationPanel } from "@/components/ManualGenerationPanel";
 
 const TYPES = MATERIAL_TYPES;
@@ -12,6 +13,7 @@ interface Asset { material_type: string; original_filename: string; file_size: n
 interface Version {
   id: string; displayName: string; status: string; createdAt: number; publishedAt: number | null;
   generationDeadline: number | null; expiresAt: number | null; assetCount: number; generationCount: number;
+  entryStats: Array<{ entry: string; bindingCount: number; succeededCount: number }>;
   links: Array<{ entry: string; url: string }>;
 }
 
@@ -169,8 +171,9 @@ export function AdminDashboard({ routeKey }: { routeKey: string }) {
               ) : (
                 <>
                   <div className="timeline-strip"><div><span>发布时间</span><strong>{dateTime(active.publishedAt)}</strong></div><div><span>停止新增生成</span><strong>{dateTime(active.generationDeadline)}</strong></div><div><span>链接失效</span><strong>{dateTime(active.expiresAt)}</strong></div></div>
-                  <div className="links-panel"><div className="panel-title"><Link2 /><div><h2>6 个商品发货链接</h2><p>复制后分别填入小红书商品自动发货信息。</p></div></div><div className="link-list">{active.links.map((link) => <div className="link-row" key={link.entry}><span>{link.entry === "BUNDLE" ? "五项合集" : link.entry}</span><code>{link.url}</code><button onClick={() => copy(link.url)}>{copied === link.url ? <Check /> : <Clipboard />}{copied === link.url ? "已复制" : "复制"}</button></div>)}</div></div>
+                  <div className="links-panel"><div className="panel-title"><Link2 /><div><h2>6 个商品发货链接</h2><p>复制后分别填入小红书商品自动发货信息。</p></div></div><div className="link-list">{active.links.map((link) => { const stats = active.entryStats?.find((item) => item.entry === link.entry); return <div className="link-row" key={link.entry}><span>{link.entry === "BUNDLE" ? "五项合集" : link.entry}</span><code>{link.url}</code><small className="link-stats">绑定 {stats?.bindingCount ?? 0} · 成功 {stats?.succeededCount ?? 0}</small><button onClick={() => copy(link.url)}>{copied === link.url ? <Check /> : <Clipboard />}{copied === link.url ? "已复制" : "复制"}</button></div>; })}</div></div>
                   <ManualGenerationPanel key={`manual-${active.id}`} versionId={active.id} phase={active.status} />
+                  <BindingRecordsPanel key={`bindings-${active.id}`} versionId={active.id} />
                 </>
               )}
             </>

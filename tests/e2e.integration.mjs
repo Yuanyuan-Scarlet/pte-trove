@@ -164,4 +164,19 @@ const invalidManual = await fetch(`${baseUrl}/api/admin/versions/${version.id}/m
 });
 assert.equal(invalidManual.status, 400, "an empty salutation must be rejected");
 
-console.log(JSON.stringify({ versionId: version.id, links: published.links.length, generated: status.filename, pages: pdf.getPageCount(), bundleFiles: Object.keys(bundleFiles).length, manualRecord: manualRecord.downloadFilename }));
+const bindingList = await jsonResponse(await fetch(`${baseUrl}/api/admin/versions/${version.id}/bindings`, { headers: { cookie: adminCookie } }));
+const wfdBinding = bindingList.bindings.find((item) => item.entry === "WFD");
+assert.ok(wfdBinding, "the WFD purchase record must appear in the bindings list");
+assert.equal(wfdBinding.phone, phone);
+assert.equal(wfdBinding.orderNumber, orderNumber);
+assert.equal(wfdBinding.jobStatus, "SUCCEEDED");
+assert.equal(wfdBinding.fileStatus, "ACTIVE");
+const unauthorizedBindings = await fetch(`${baseUrl}/api/admin/versions/${version.id}/bindings`);
+assert.equal(unauthorizedBindings.status, 401);
+
+const statsList = await jsonResponse(await fetch(`${baseUrl}/api/admin/versions`, { headers: { cookie: adminCookie } }));
+const statsVersion = statsList.versions.find((item) => item.id === version.id);
+const wfdStats = statsVersion.entryStats.find((item) => item.entry === "WFD");
+assert.deepEqual(wfdStats, { entry: "WFD", bindingCount: 1, succeededCount: 1 });
+
+console.log(JSON.stringify({ versionId: version.id, links: published.links.length, generated: status.filename, pages: pdf.getPageCount(), bundleFiles: Object.keys(bundleFiles).length, manualRecord: manualRecord.downloadFilename, bindings: bindingList.bindings.length }));
