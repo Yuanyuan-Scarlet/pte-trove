@@ -42,13 +42,12 @@ async function readObject(key: string): Promise<ArrayBuffer> {
   return bytes;
 }
 
-async function generateBuyerFileInternal(
+async function renderEntryOutput(
   materialVersionId: string,
   entry: ProductEntry,
-  bindingId: string,
-  jobId: string,
   phone: string,
-): Promise<GeneratedFileRecord> {
+  salutation?: string,
+): Promise<{ bytes: Uint8Array; mimeType: string; extension: "pdf" | "zip" }> {
   const assets = await all<AssetRow>(
     "SELECT material_type, source_storage_key FROM material_assets WHERE material_version_id = ? AND validation_status = 'VALID'",
     materialVersionId,
@@ -60,16 +59,25 @@ async function generateBuyerFileInternal(
   let bytes: Uint8Array;
   if (entry === "BUNDLE") {
     const watermarked = {} as Record<MaterialType, Uint8Array>;
-    for (const type of MATERIAL_TYPES) watermarked[type] = await addPhoneWatermark(await readObject(assetMap.get(type)!), phone);
+    for (const type of MATERIAL_TYPES) watermarked[type] = await addPhoneWatermark(await readObject(assetMap.get(type)!), phone, salutation);
     bytes = await buildBundle(watermarked);
   } else {
-    bytes = await addPhoneWatermark(await readObject(assetMap.get(entry as MaterialType)!), phone);
+    bytes = await addPhoneWatermark(await readObject(assetMap.get(entry as MaterialType)!), phone, salutation);
   }
 
+  return { bytes, mimeType: outputMimeType(entry), extension: entry === "BUNDLE" ? "zip" : "pdf" };
+}
+
+async function generateBuyerFileInternal(
+  materialVersionId: string,
+  entry: ProductEntry,
+  bindingId: string,
+  jobId: string,
+  phone: string,
+): Promise<GeneratedFileRecord> {
+  const { bytes, mimeType, extension } = await renderEntryOutput(materialVersionId, entry, phone);
   const generatedAt = Date.now();
-  const extension = entry === "BUNDLE" ? "zip" : "pdf";
   const storageKey = `materials/${materialVersionId}/generated/${entry}/${bindingId}/${randomId()}.${extension}`;
-  const mimeType = outputMimeType(entry);
   await writeStorageObject(storageKey, bytes);
   const previous = await first<{ storage_key: string }>(
     "SELECT storage_key FROM generated_files WHERE generation_job_id = ?",
@@ -124,7 +132,36 @@ export async function generateBuyerFile(
   return serializeGeneration(() => generateBuyerFileInternal(materialVersionId, entry, bindingId, jobId, phone));
 }
 
-export async function archiveExpiredFiles(now = Date.now()): Promise<{ generated: number; sources: number }> {
+export interface ManualArtifact {
+  storageKey: string;
+  mimeType: string;
+  fileSize: number;
+  checksum: string;
+  generatedAt: number;
+}
+
+export async function generateManualArtifact(
+  materialVersionId: string,
+  entry: ProductEntry,
+  manualId: string,
+  phone: string,
+  salutation: string,
+): Promise<ManualArtifact> {
+  return serializeGeneration(async () => {
+    const { bytes, mimeType, extension } = await renderEntryOutput(materialVersionId, entry, phone, salutation);
+    const storageKey = `materials/${materialVersionId}/manual/${entry}/${manualId}/${randomId()}.${extension}`;
+    await writeStorageObject(storageKey, bytes);
+    return {
+      storageKey,
+      mimeType,
+      fileSize: bytes.byteLength,
+      checksum: await sha256Bytes(bytes),
+      generatedAt: Date.now(),
+    };
+  });
+}
+
+export async function archiveExpiredFiles(now = Date.now()): Promise<{ generated: number; sources: number; manual: number }> {
   const generatedFiles = await all<{ id: string; storage_key: string; archive_storage_key: string | null }>(
     "SELECT id, storage_key, archive_storage_key FROM generated_files WHERE status = 'ACTIVE' AND archive_at <= ? LIMIT 100",
     now,
@@ -143,6 +180,24 @@ export async function archiveExpiredFiles(now = Date.now()): Promise<{ generated
     generated += 1;
   }
 
+  const manualFiles = await all<{ id: string; storage_key: string }>(
+    "SELECT id, storage_key FROM manual_generations WHERE status = 'ACTIVE' AND archive_at <= ? LIMIT 100",
+    now,
+  );
+  let manual = 0;
+  for (const file of manualFiles) {
+    const archiveKey = file.storage_key.replace(/^materials\//, "old-sold/");
+    if (!await moveStorageObject(file.storage_key, archiveKey)) {
+      await run("UPDATE manual_generations SET status = 'MISSING', archived_at = ? WHERE id = ?", now, file.id);
+      continue;
+    }
+    await run(
+      "UPDATE manual_generations SET status = 'ARCHIVED', archived_at = ?, archive_storage_key = ? WHERE id = ?",
+      now, archiveKey, file.id,
+    );
+    manual += 1;
+  }
+
   const sourceAssets = await all<{ id: string; source_storage_key: string; material_version_id: string }>(
     `SELECT ma.id, ma.source_storage_key, ma.material_version_id
      FROM material_assets ma JOIN material_versions mv ON mv.id = ma.material_version_id
@@ -156,5 +211,5 @@ export async function archiveExpiredFiles(now = Date.now()): Promise<{ generated
     await run("UPDATE material_assets SET source_storage_key = ? WHERE id = ?", historyKey, asset.id);
     sources += 1;
   }
-  return { generated, sources };
+  return { generated, sources, manual };
 }

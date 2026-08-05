@@ -135,4 +135,33 @@ assert.match(bundleDownload.headers.get("content-type") ?? "", /application\/zip
 const bundleFiles = unzipSync(new Uint8Array(await bundleDownload.arrayBuffer()));
 assert.equal(Object.keys(bundleFiles).length, 5);
 
-console.log(JSON.stringify({ versionId: version.id, links: published.links.length, generated: status.filename, pages: pdf.getPageCount(), bundleFiles: Object.keys(bundleFiles).length }));
+const manualCreateResponse = await fetch(`${baseUrl}/api/admin/versions/${version.id}/manual-generations`, {
+  method: "POST",
+  headers: { ...originHeaders, cookie: adminCookie, "content-type": "application/json" },
+  body: JSON.stringify({ entry: "WFD", salutation: "张同学", phone: "+61 412 345 678" }),
+});
+const { record: manualRecord } = await jsonResponse(manualCreateResponse);
+assert.equal(manualCreateResponse.status, 201);
+assert.equal(manualRecord.status, "ACTIVE");
+assert.equal(manualRecord.downloadFilename, "PTE突击宝藏资料-WFD-张同学.pdf");
+
+const manualList = await jsonResponse(await fetch(`${baseUrl}/api/admin/versions/${version.id}/manual-generations`, { headers: { cookie: adminCookie } }));
+assert.equal(manualList.records.length, 1);
+assert.equal(manualList.records[0].id, manualRecord.id);
+
+const manualDownload = await fetch(`${baseUrl}/api/admin/manual-generations/${manualRecord.id}/download`, { headers: { cookie: adminCookie } });
+assert.equal(manualDownload.status, 200);
+assert.match(manualDownload.headers.get("content-type") ?? "", /application\/pdf/);
+const manualPdf = await PDFDocument.load(await manualDownload.arrayBuffer());
+assert.ok(manualPdf.getPageCount() >= 1);
+const manualUnauthorized = await fetch(`${baseUrl}/api/admin/manual-generations/${manualRecord.id}/download`);
+assert.equal(manualUnauthorized.status, 401);
+
+const invalidManual = await fetch(`${baseUrl}/api/admin/versions/${version.id}/manual-generations`, {
+  method: "POST",
+  headers: { ...originHeaders, cookie: adminCookie, "content-type": "application/json" },
+  body: JSON.stringify({ entry: "WFD", salutation: "", phone: "13800000000" }),
+});
+assert.equal(invalidManual.status, 400, "an empty salutation must be rejected");
+
+console.log(JSON.stringify({ versionId: version.id, links: published.links.length, generated: status.filename, pages: pdf.getPageCount(), bundleFiles: Object.keys(bundleFiles).length, manualRecord: manualRecord.downloadFilename }));

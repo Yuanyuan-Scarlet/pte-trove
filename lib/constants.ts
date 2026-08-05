@@ -49,6 +49,9 @@ export const ADMIN_SESSION_MS = 12 * 60 * 60 * 1000;
 export const PHONE_PATTERN = /^1[3-9]\d{9}$/;
 export const ORDER_PATTERN = /^P\d{18}$/;
 
+export const MANUAL_SALUTATION_MAX_LENGTH = 20;
+export const MANUAL_PHONE_MAX_LENGTH = 32;
+
 export const DOWNLOAD_NAMES: Record<ProductEntry, string> = {
   WFD: "PTE突击宝藏资料-WFD.pdf",
   DI: "PTE突击宝藏资料-DI.pdf",
@@ -57,3 +60,9 @@ export const DOWNLOAD_NAMES: Record<ProductEntry, string> = {
   WE: "PTE突击宝藏资料-WE.pdf",
   BUNDLE: "PTE突击宝藏资料-五项合集.zip",
 };
+
+export function manualDownloadName(entry: ProductEntry, salutation: string): string {
+  const base = DOWNLOAD_NAMES[entry];
+  const dot = base.lastIndexOf(".");
+  return `${base.slice(0, dot)}-${salutation}${base.slice(dot)}`;
+}

@@ -48,12 +48,28 @@ test("persists SQLite data, enforces uniqueness, and archives private files", as
       "asset-1", versionId, "WFD", sourceKey, "WFD.pdf", 3, 1, "checksum", 1,
     );
 
+    const manualKey = "materials/version-1/manual/WFD/manual-1/file.pdf";
+    await storage.writeStorageObject(manualKey, new Uint8Array([7, 8, 9]));
+    await database.run(
+      `INSERT INTO manual_generations (id, material_version_id, product_entry, salutation, phone, status, error_code,
+       storage_key, download_filename, mime_type, file_size, checksum, generated_at, archive_at, archived_at, archive_storage_key, created_at)
+       VALUES (?, ?, ?, ?, ?, 'ACTIVE', NULL, ?, ?, 'application/pdf', 3, 'checksum', 1, 2, NULL, NULL, 1)`,
+      "manual-1", versionId, "WFD", "张同学", "+61 412 345 678", manualKey, "PTE突击宝藏资料-WFD-张同学.pdf",
+    );
+
     const archived = await files.archiveExpiredFiles(3);
-    assert.deepEqual(archived, { generated: 1, sources: 1 });
+    assert.deepEqual(archived, { generated: 1, sources: 1, manual: 1 });
     assert.equal(await storage.readStorageObject(generatedKey), null);
     assert.deepEqual(Array.from(new Uint8Array((await storage.readStorageObject("old-sold/version-1/generated/WFD/binding-1/file.pdf"))!)), [1, 2, 3]);
     assert.equal(await storage.readStorageObject(sourceKey), null);
     assert.deepEqual(Array.from(new Uint8Array((await storage.readStorageObject("history/version-1/source/WFD.pdf"))!)), [4, 5, 6]);
+    assert.equal(await storage.readStorageObject(manualKey), null);
+    assert.deepEqual(Array.from(new Uint8Array((await storage.readStorageObject("old-sold/version-1/manual/WFD/manual-1/file.pdf"))!)), [7, 8, 9]);
+    const archivedManual = await database.first<{ status: string; archive_storage_key: string | null }>(
+      "SELECT status, archive_storage_key FROM manual_generations WHERE id = ?", "manual-1",
+    );
+    assert.equal(archivedManual?.status, "ARCHIVED");
+    assert.equal(archivedManual?.archive_storage_key, "old-sold/version-1/manual/WFD/manual-1/file.pdf");
     assert.throws(() => storage.resolveStorageKey("../outside"), /私有目录/);
   } finally {
     database.closeDatabase();

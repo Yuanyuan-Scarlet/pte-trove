@@ -201,6 +201,27 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .admin-empty h2 { margin: 18px 0 6px; color: var(--ink); }
 .admin-empty p { margin: 0; font-size: 12px; }
 
+.manual-form { margin-top: 20px; display: grid; grid-template-columns: 130px 1fr 1fr auto; gap: 10px; align-items: end; }
+.manual-form label { display: grid; gap: 7px; font-size: 12px; font-weight: 800; }
+.manual-form input, .manual-form select { min-width: 0; height: 46px; padding: 0 13px; border: 1px solid #e4dbd7; border-radius: 12px; outline: 0; background: #fffdfa; font-size: 16px; }
+.manual-form input:focus, .manual-form select:focus { border-color: var(--brand); box-shadow: 0 0 0 4px #ef4f5c12; }
+.manual-submit { min-height: 46px; padding: 0 18px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 12px; color: white; background: var(--brand); cursor: pointer; font-size: 12px; font-weight: 900; }
+.manual-submit:disabled { cursor: default; opacity: .4; }
+.manual-submit svg { width: 16px; height: 16px; }
+.manual-disabled { margin: 18px 0 0; color: #91878a; font-size: 12px; }
+.manual-panel .form-notice, .bindings-panel .form-notice { margin-top: 14px; }
+.records-scroll { margin-top: 18px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.records-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.records-table th { padding: 8px 10px; border-bottom: 1px solid #ece5e1; color: #91878a; font-size: 10px; text-align: left; white-space: nowrap; }
+.records-table td { padding: 10px; border-bottom: 1px solid #f2ece8; white-space: nowrap; }
+.records-empty { margin: 16px 0 4px; color: #9b9194; font-size: 11px; text-align: center; }
+.record-download { display: inline-flex; align-items: center; gap: 5px; padding: 9px 11px; border-radius: 8px; color: var(--brand); background: #fff0f1; font-size: 10px; font-weight: 900; text-decoration: none; }
+.record-download svg { width: 14px; height: 14px; }
+.status-pill.manual-active, .status-pill.manual-succeeded { color: #167456; background: #e7f7f0; }
+.status-pill.manual-processing { color: #846c31; background: #fff4d8; }
+.status-pill.manual-failed, .status-pill.manual-missing { color: #a72f3a; background: #ffe9eb; }
+.status-pill.manual-archived, .status-pill.manual-none { color: #776e71; background: #e9e6e5; }
+
 @media (max-width: 900px) {
   .portal-layout { grid-template-columns: 1fr; gap: 36px; padding-top: 40px; }
   .portal-hero { text-align: center; }
@@ -208,6 +229,8 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
   .claim-card { width: min(540px, 100%); margin: auto; }
   .admin-grid { grid-template-columns: 230px minmax(0, 1fr); }
   .upload-grid { grid-template-columns: 1fr; }
+  .manual-form { grid-template-columns: 1fr 1fr; }
+  .manual-form .manual-submit { grid-column: 1 / -1; }
 }
 
 @media (max-width: 640px) {
@@ -237,7 +260,10 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
   .timeline-strip div + div { padding: 10px 0 0; border-top: 1px solid #e7e0dd; border-left: 0; }
   .links-panel { padding: 18px 13px; }
   .link-row { grid-template-columns: 62px minmax(0, 1fr) auto; }
-  .link-row button { width: 34px; padding: 8px; font-size: 0; }
+  .link-row button { width: 44px; min-height: 44px; padding: 8px; font-size: 0; }
+  .manual-form { grid-template-columns: 1fr; }
+  .manual-submit { width: 100%; min-height: 48px; }
+  .record-download { min-height: 44px; padding: 12px 14px; }
 }
 
 @media (max-width: 360px) {

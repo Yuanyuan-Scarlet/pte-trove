@@ -36,6 +36,13 @@ const statements = [
     checksum TEXT NOT NULL, generated_at INTEGER NOT NULL, archive_at INTEGER NOT NULL,
     archived_at INTEGER, archive_storage_key TEXT, status TEXT NOT NULL
   )`,
+  `CREATE TABLE IF NOT EXISTS manual_generations (
+    id TEXT PRIMARY KEY, material_version_id TEXT NOT NULL, product_entry TEXT NOT NULL,
+    salutation TEXT NOT NULL, phone TEXT NOT NULL, status TEXT NOT NULL, error_code TEXT,
+    storage_key TEXT, download_filename TEXT, mime_type TEXT, file_size INTEGER, checksum TEXT,
+    generated_at INTEGER, archive_at INTEGER, archived_at INTEGER, archive_storage_key TEXT,
+    created_at INTEGER NOT NULL
+  )`,
   `CREATE TABLE IF NOT EXISTS buyer_sessions (
     id TEXT PRIMARY KEY, buyer_binding_id TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE,
     created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL, revoked_at INTEGER
@@ -53,6 +60,8 @@ const statements = [
     id TEXT PRIMARY KEY, ip TEXT NOT NULL, succeeded INTEGER NOT NULL, created_at INTEGER NOT NULL
   )`,
   `CREATE INDEX IF NOT EXISTS generated_archive_idx ON generated_files(status, archive_at)`,
+  `CREATE INDEX IF NOT EXISTS manual_version_created_idx ON manual_generations(material_version_id, created_at)`,
+  `CREATE INDEX IF NOT EXISTS manual_archive_idx ON manual_generations(status, archive_at)`,
   `CREATE INDEX IF NOT EXISTS buyer_session_binding_idx ON buyer_sessions(buyer_binding_id)`,
   `CREATE INDEX IF NOT EXISTS otp_phone_created_idx ON otp_challenges(phone, created_at)`,
   `CREATE INDEX IF NOT EXISTS otp_ip_created_idx ON otp_challenges(ip, created_at)`,

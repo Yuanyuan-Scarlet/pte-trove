@@ -74,6 +74,26 @@ export const generatedFiles = sqliteTable("generated_files", {
   status: text("status").notNull(),
 }, (table) => [uniqueIndex("generated_job_unique").on(table.generationJobId), index("generated_archive_idx").on(table.status, table.archiveAt)]);
 
+export const manualGenerations = sqliteTable("manual_generations", {
+  id: text("id").primaryKey(),
+  materialVersionId: text("material_version_id").notNull(),
+  productEntry: text("product_entry").notNull(),
+  salutation: text("salutation").notNull(),
+  phone: text("phone").notNull(),
+  status: text("status").notNull(),
+  errorCode: text("error_code"),
+  storageKey: text("storage_key"),
+  downloadFilename: text("download_filename"),
+  mimeType: text("mime_type"),
+  fileSize: integer("file_size"),
+  checksum: text("checksum"),
+  generatedAt: integer("generated_at"),
+  archiveAt: integer("archive_at"),
+  archivedAt: integer("archived_at"),
+  archiveStorageKey: text("archive_storage_key"),
+  createdAt: integer("created_at").notNull(),
+}, (table) => [index("manual_version_created_idx").on(table.materialVersionId, table.createdAt), index("manual_archive_idx").on(table.status, table.archiveAt)]);
+
 export const buyerSessions = sqliteTable("buyer_sessions", {
   id: text("id").primaryKey(),
   buyerBindingId: text("buyer_binding_id").notNull(),

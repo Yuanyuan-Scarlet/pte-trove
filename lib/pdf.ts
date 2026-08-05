@@ -16,8 +16,8 @@ export const WATERMARK_OPACITY = 0.015;
 const WATERMARK_ROTATION = 45;
 const WATERMARK_TEXT_OFFSET = 100;
 
-export function watermarkTextFields(phone: string): [string, string] {
-  return [`  祝考试好运 UPUP`, `    ${phone}`];
+export function watermarkTextFields(phone: string, salutation?: string): [string, string] {
+  return [salutation ? `  祝${salutation}考试好运 UPUP` : `  祝考试好运 UPUP`, `    ${phone}`];
 }
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
@@ -55,12 +55,12 @@ export async function inspectPdf(bytes: ArrayBuffer): Promise<{ pageCount: numbe
   }
 }
 
-export async function addPhoneWatermark(source: ArrayBuffer, phone: string): Promise<Uint8Array> {
+export async function addPhoneWatermark(source: ArrayBuffer, phone: string, salutation?: string): Promise<Uint8Array> {
   const [fontBytes, logoBytes] = await Promise.all([getWatermarkFont(), getWatermarkLogo()]);
-  return addPhoneWatermarkWithAssets(source, phone, fontBytes, logoBytes);
+  return addPhoneWatermarkWithAssets(source, phone, fontBytes, logoBytes, salutation);
 }
 
-async function createWatermarkPage(phone: string, fontBytes: ArrayBuffer, logoBytes: ArrayBuffer): Promise<Uint8Array> {
+async function createWatermarkPage(phone: string, fontBytes: ArrayBuffer, logoBytes: ArrayBuffer, salutation?: string): Promise<Uint8Array> {
   const watermarkDocument = await PDFDocument.create();
   watermarkDocument.registerFontkit(fontkit);
   const [font, logo] = await Promise.all([
@@ -89,7 +89,7 @@ async function createWatermarkPage(phone: string, fontBytes: ArrayBuffer, logoBy
       rotate: degrees(WATERMARK_ROTATION),
     });
   };
-  const [greeting, phoneText] = watermarkTextFields(phone);
+  const [greeting, phoneText] = watermarkTextFields(phone, salutation);
   drawWatermarkText(greeting, 150, 200);
   drawWatermarkText(phoneText, 200, 90);
 
@@ -109,9 +109,10 @@ export async function addPhoneWatermarkWithAssets(
   phone: string,
   fontBytes: ArrayBuffer,
   logoBytes: ArrayBuffer,
+  salutation?: string,
 ): Promise<Uint8Array> {
   const document = await PDFDocument.load(source, { ignoreEncryption: false, updateMetadata: false });
-  const [watermarkPage] = await document.embedPdf(await createWatermarkPage(phone, fontBytes, logoBytes), [0]);
+  const [watermarkPage] = await document.embedPdf(await createWatermarkPage(phone, fontBytes, logoBytes, salutation), [0]);
 
   for (const page of document.getPages()) {
     const { width, height } = page.getSize();

@@ -57,6 +57,17 @@ test("uses the delivery watermark opacity and leading text spacing", () => {
   ]);
 });
 
+test("weaves the manual salutation into the greeting without touching the phone line", () => {
+  assert.deepEqual(watermarkTextFields("+61 412 345 678", "张同学"), [
+    "  祝张同学考试好运 UPUP",
+    "    +61 412 345 678",
+  ]);
+  assert.deepEqual(watermarkTextFields("13800000000", ""), [
+    "  祝考试好运 UPUP",
+    "    13800000000",
+  ]);
+});
+
 test("builds a five-file bundle with fixed public filenames", async () => {
   const bytes = new Uint8Array(await samplePdf());
   const archive = await buildBundle({ WFD: bytes, DI: bytes, SST: bytes, RS: bytes, WE: bytes });

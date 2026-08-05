@@ -1,6 +1,8 @@
 import {
   GENERATION_WINDOW_MS,
   LINK_WINDOW_MS,
+  MANUAL_PHONE_MAX_LENGTH,
+  MANUAL_SALUTATION_MAX_LENGTH,
   ORDER_PATTERN,
   PHONE_PATTERN,
   PRODUCT_ENTRIES,
@@ -53,6 +55,31 @@ export function isValidOrderNumber(orderNumber: string): boolean {
 
 export function isProductEntry(value: string): value is ProductEntry {
   return PRODUCT_ENTRIES.includes(value as ProductEntry);
+}
+
+function stripControlChars(value: string): string {
+  let result = "";
+  for (const ch of value) {
+    const code = ch.codePointAt(0) ?? 0;
+    if (code >= 32 && code !== 127) result += ch;
+  }
+  return result;
+}
+
+export function normalizeSalutation(value: unknown): string {
+  return stripControlChars(String(value ?? "").replace(/\s+/g, " ")).replace(/[\\/:"*?<>|]/g, "").trim();
+}
+
+export function isValidSalutation(salutation: string): boolean {
+  return salutation.length > 0 && salutation.length <= MANUAL_SALUTATION_MAX_LENGTH;
+}
+
+export function normalizeManualPhone(value: unknown): string {
+  return stripControlChars(String(value ?? "").replace(/\s+/g, " ")).trim();
+}
+
+export function isValidManualPhone(phone: string): boolean {
+  return phone.length > 0 && phone.length <= MANUAL_PHONE_MAX_LENGTH;
 }
 
 export function maskPhone(phone: string): string {
