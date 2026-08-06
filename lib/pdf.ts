@@ -69,12 +69,12 @@ async function createWatermarkPage(phone: string, fontBytes: ArrayBuffer, logoBy
   ]);
   const page = watermarkDocument.addPage([WATERMARK_PAGE_WIDTH, WATERMARK_PAGE_HEIGHT]);
 
+  // 右下角 logo 刻意不透明，与参考实现 add_waterprint.py 一致
   page.drawImage(logo, {
     x: WATERMARK_PAGE_WIDTH - logo.width / 6,
     y: 0,
     width: logo.width / 12,
     height: logo.height / 12,
-    opacity: WATERMARK_OPACITY,
   });
 
   const radians = WATERMARK_ROTATION * Math.PI / 180;
@@ -119,7 +119,23 @@ export async function addPhoneWatermarkWithAssets(
     page.drawPage(watermarkPage, { x: 0, y: 0, width, height });
   }
 
-  return document.save({ useObjectStreams: true });
+  return flattenDocument(document);
+}
+
+// 重建文档：把「原内容+水印」整页包进新文档的嵌套 XObject，避免水印作为顶层共享对象被一次性剥除
+async function flattenDocument(document: PDFDocument): Promise<Uint8Array> {
+  // embedPdf 的产物要到 save/flush 才写入上下文；跨文档拷贝前必须先物化，否则水印 form 是悬空引用
+  await document.flush();
+  const flattened = await PDFDocument.create();
+  const embeddedPages = await flattened.embedPdf(document, document.getPageIndices());
+  for (const [index, embedded] of embeddedPages.entries()) {
+    const sourcePage = document.getPage(index);
+    const { width, height } = sourcePage.getSize();
+    const page = flattened.addPage([width, height]);
+    page.setRotation(sourcePage.getRotation());
+    page.drawPage(embedded, { x: 0, y: 0, width, height });
+  }
+  return flattened.save({ useObjectStreams: true });
 }
 
 export async function buildBundle(files: Record<MaterialType, Uint8Array>): Promise<Uint8Array> {
